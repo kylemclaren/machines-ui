@@ -9,6 +9,14 @@ import { useParams, useRouter } from 'next/navigation';
 import { Volume } from '../../../../../../types/api';
 import { TimeAgo } from "@/components/ui/time-ago";
 import { CopyableCode } from '@/components/ui/copyable-code';
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
 
 export default function VolumeDetailsPage() {
   const params = useParams();
@@ -61,6 +69,40 @@ export default function VolumeDetailsPage() {
 
   return (
     <div>
+      <div className="flex justify-between items-center mb-6">
+        <Breadcrumb className="mb-4">
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink href="/dashboard">
+                Dashboard
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbLink href="/dashboard/apps">
+                Apps
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbLink href={`/dashboard/apps/${appName}`}>
+                {appName}
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbLink href={`/dashboard/volumes`}>
+                Volumes
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbPage>{volume?.name || volumeId}</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
+      </div>
+      
       <div className="flex justify-between items-center mb-6">
         <div>
           <div className="flex items-center">
