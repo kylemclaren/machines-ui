@@ -59,7 +59,7 @@ export default function StatusIndicator() {
   }
 
   return (
-    <div className="fixed bottom-4 right-4 z-50">
+    <div className="fixed bottom-4 left-4 z-50">
       <div className="flex items-center space-x-2 bg-white dark:bg-gray-800 rounded-full shadow-md px-3 py-1.5 border border-green-200 dark:border-green-800">
         <CheckCircle2 className="h-4 w-4 text-green-500" />
         <span className="text-xs font-medium text-green-700 dark:text-green-400">All Systems Operational</span>
