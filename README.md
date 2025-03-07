@@ -47,7 +47,7 @@ A modern dashboard for managing your Fly.io resources through the Machines API. 
 To use the dashboard, you'll need to authenticate with your Fly.io API token:
 
 1. Download the [Fly CLI]((https://fly.io/docs/flyctl/install/))
-2. Generate an API token with `fly auth tokens create org to create a new token`
+2. Generate an API token with `fly tokens create org to create a new token`
 3. Enter your token in the login screen of the dashboard
 
 ## API Documentation
