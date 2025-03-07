@@ -1,9 +1,9 @@
-import React, { ReactNode } from 'react';
+import React, { ReactNode, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useApi } from '../../lib/api-context';
 import ThemeToggle from './ThemeToggle';
-import { ExternalLink } from 'lucide-react';
+import { ExternalLink, Menu, X } from 'lucide-react';
 
 interface NavItem {
   href: string;
@@ -18,6 +18,11 @@ interface DashboardLayoutProps {
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const pathname = usePathname();
   const { isAuthenticated, clearToken, orgSlug } = useApi();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  const toggleSidebar = () => {
+    setSidebarOpen(!sidebarOpen);
+  };
 
   const navItems: NavItem[] = [
     {
@@ -85,8 +90,20 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
   return (
     <div className="flex h-screen bg-gray-50 dark:bg-gray-900">
+      {/* Mobile Sidebar Backdrop */}
+      {sidebarOpen && (
+        <div 
+          className="fixed inset-0 z-20 bg-gray-800 bg-opacity-50 lg:hidden"
+          onClick={toggleSidebar}
+        />
+      )}
+
       {/* Sidebar */}
-      <aside className="w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700">
+      <aside 
+        className={`fixed inset-y-0 left-0 w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 transition-transform duration-300 ease-in-out z-30 ${
+          sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+        } lg:translate-x-0 lg:static lg:z-0`}
+      >
         <div className="flex flex-col h-full">
           <div className="flex items-center justify-between h-16 px-4 border-b border-gray-200 dark:border-gray-700">
             <Link href="/dashboard" className="flex items-center">
@@ -103,6 +120,12 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                 className="h-8 hidden dark:block" 
               />
             </Link>
+            <button 
+              className="p-2 rounded-md text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 lg:hidden"
+              onClick={toggleSidebar}
+            >
+              <X size={24} />
+            </button>
           </div>
           
           <nav className="flex-1 px-2 pt-4 pb-4 overflow-y-auto">
@@ -118,6 +141,12 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                         ? 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white' 
                         : 'text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white'
                     }`}
+                    onClick={() => {
+                      // Close sidebar on mobile when item is clicked
+                      if (window.innerWidth < 1024) {
+                        setSidebarOpen(false);
+                      }
+                    }}
                   >
                     <span className="mr-3">{item.icon}</span>
                     {item.label}
@@ -173,11 +202,39 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       </aside>
 
       {/* Main content */}
-      <main className="flex-1 overflow-y-auto bg-gray-50 dark:bg-gray-900">
-        <div className="py-6 mx-auto px-4 sm:px-6 md:px-8">
-          {children}
-        </div>
-      </main>
+      <div className="flex-1 flex flex-col overflow-hidden">
+        {/* Mobile header with hamburger menu */}
+        <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 lg:hidden">
+          <div className="flex items-center justify-between h-16 px-4">
+            <div className="flex items-center">
+              <button 
+                className="p-2 rounded-md text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500"
+                onClick={toggleSidebar}
+              >
+                <Menu size={24} />
+              </button>
+              <Link href="/dashboard" className="flex items-center ml-2">
+                <img 
+                  src="https://fly.io/static/images/brand/logo-landscape-dark.svg" 
+                  alt="Fly.io" 
+                  className="h-8 block dark:hidden" 
+                />
+                <img 
+                  src="https://fly.io/static/images/brand/logo-landscape-light.svg" 
+                  alt="Fly.io" 
+                  className="h-8 hidden dark:block" 
+                />
+              </Link>
+            </div>
+          </div>
+        </header>
+
+        <main className="flex-1 overflow-y-auto bg-gray-50 dark:bg-gray-900">
+          <div className="py-6 mx-auto px-4 sm:px-6 md:px-8">
+            {children}
+          </div>
+        </main>
+      </div>
     </div>
   );
 } 
