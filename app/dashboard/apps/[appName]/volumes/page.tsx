@@ -67,8 +67,8 @@ export default function AppVolumesPage() {
 
   return (
     <div>
-      <div className="flex items-center mb-2">
-        <Breadcrumb className="w-full">
+      <div className="flex justify-between items-center mb-6">
+        <Breadcrumb className="mb-4">
           <BreadcrumbList>
             <BreadcrumbItem>
               <BreadcrumbLink href="/dashboard">
