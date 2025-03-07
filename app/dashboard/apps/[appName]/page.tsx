@@ -9,6 +9,8 @@ import { useRouter, useParams } from 'next/navigation';
 import { TimeAgo } from "@/components/ui/time-ago";
 import { ConfirmationDialog } from '@/components/ui/confirmation-dialog';
 import toast from 'react-hot-toast';
+import { CopyableCode } from '@/components/ui/copyable-code';
+import { Trash2 } from 'lucide-react';
 
 export default function AppDetailsPage() {
   const params = useParams();
@@ -109,7 +111,7 @@ export default function AppDetailsPage() {
         </p>
         <Link
           href="/dashboard/apps"
-          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+          className="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-100 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600"
         >
           Back to Apps
         </Link>
@@ -186,25 +188,24 @@ export default function AppDetailsPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <p className="text-sm font-medium text-gray-500 dark:text-gray-400">App ID</p>
-            <p className="text-sm text-gray-900 dark:text-white font-mono">{app.id || 'N/A'}</p>
-          </div>
-          
-          <div>
-            <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Name</p>
-            <p className="text-sm text-gray-900 dark:text-white font-mono">{app.name}</p>
-          </div>
-          
-          <div>
-            <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Organization</p>
-            <p className="text-sm text-gray-900 dark:text-white font-mono">
-              {app.organization?.slug || 'unknown'}
+            <p className="text-sm text-gray-900 dark:text-white font-mono flex items-center">
+              <CopyableCode value={app.id || 'N/A'}>{app.id || 'N/A'}</CopyableCode>
             </p>
           </div>
           
           <div>
-            <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Organization ID</p>
-            <p className="text-sm text-gray-900 dark:text-white font-mono">
-              {app.organization?.id || 'unknown'}
+            <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Name</p>
+            <p className="text-sm text-gray-900 dark:text-white font-mono flex items-center">
+              <CopyableCode value={app.name}>{app.name}</CopyableCode>
+            </p>
+          </div>
+          
+          <div>
+            <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Organization Slug</p>
+            <p className="text-sm text-gray-900 dark:text-white font-mono flex items-center">
+              <CopyableCode value={app.organization?.slug || 'unknown'}>
+                {app.organization?.slug || 'unknown'}
+              </CopyableCode>
             </p>
           </div>
           

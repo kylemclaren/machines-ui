@@ -11,6 +11,8 @@ import { TimeAgo } from "@/components/ui/time-ago";
 import toast from 'react-hot-toast';
 import { ConfirmationDialog } from '@/components/ui/confirmation-dialog';
 import { getRegionFlag, formatMemory, capitalizeMachineState } from '@/lib/utils';
+import { Play, Square, RotateCw, Trash2 } from 'lucide-react';
+import { CopyableCode } from '@/components/ui/copyable-code';
 
 export default function MachineDetailsPage() {
   const params = useParams();
@@ -178,8 +180,9 @@ export default function MachineDetailsPage() {
               <button
                 onClick={() => openConfirmation('start')}
                 disabled={isLoading}
-                className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50"
+                className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50 flex items-center"
               >
+                <Play size={18} className="mr-2" />
                 Start
               </button>
             )}
@@ -187,23 +190,26 @@ export default function MachineDetailsPage() {
               <button
                 onClick={() => openConfirmation('stop')}
                 disabled={isLoading}
-                className="px-4 py-2 bg-yellow-600 text-white rounded-md hover:bg-yellow-700 disabled:opacity-50"
+                className="px-4 py-2 bg-yellow-600 text-white rounded-md hover:bg-yellow-700 disabled:opacity-50 flex items-center"
               >
+                <Square size={18} className="mr-2" />
                 Stop
               </button>
             )}
             <button
               onClick={() => openConfirmation('restart')}
               disabled={isLoading}
-              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
+              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 flex items-center"
             >
+              <RotateCw size={18} className="mr-2" />
               Restart
             </button>
             <button
               onClick={() => openConfirmation('delete')}
               disabled={isLoading}
-              className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:opacity-50"
+              className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:opacity-50 flex items-center"
             >
+              <Trash2 size={18} className="mr-2" />
               Delete
             </button>
           </div>
@@ -218,7 +224,9 @@ export default function MachineDetailsPage() {
           <div className="space-y-4">
             <div>
               <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Machine ID</p>
-              <p className="mt-1 text-sm text-gray-900 dark:text-white font-mono">{machine.id}</p>
+              <p className="mt-1 text-sm text-gray-900 dark:text-white font-mono flex items-center">
+                <CopyableCode value={machine.id}>{machine.id}</CopyableCode>
+              </p>
             </div>
             <div>
               <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Region</p>
@@ -241,8 +249,8 @@ export default function MachineDetailsPage() {
             </div>
             <div>
               <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Image</p>
-              <p className="mt-1 text-sm text-gray-900 dark:text-white font-mono">
-                {machine.config.image}
+              <p className="mt-1 text-sm text-gray-900 dark:text-white font-mono flex items-center">
+                <CopyableCode value={machine.config.image}>{machine.config.image}</CopyableCode>
               </p>
             </div>
           </div>

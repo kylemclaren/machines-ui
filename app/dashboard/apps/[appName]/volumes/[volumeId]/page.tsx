@@ -8,6 +8,7 @@ import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { Volume } from '../../../../../../types/api';
 import { TimeAgo } from "@/components/ui/time-ago";
+import { CopyableCode } from '@/components/ui/copyable-code';
 
 export default function VolumeDetailsPage() {
   const params = useParams();
@@ -48,7 +49,7 @@ export default function VolumeDetailsPage() {
         </p>
         <Link
           href={`/dashboard/volumes?app=${appName}`}
-          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+          className="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-100 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600"
         >
           Back to Volumes
         </Link>
@@ -92,11 +93,15 @@ export default function VolumeDetailsPage() {
           <div className="space-y-4">
             <div>
               <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Volume ID</p>
-              <p className="mt-1 text-sm text-gray-900 dark:text-white font-mono">{volume.id}</p>
+              <p className="mt-1 text-sm text-gray-900 dark:text-white font-mono flex items-center">
+                <CopyableCode value={volume.id}>{volume.id}</CopyableCode>
+              </p>
             </div>
             <div>
               <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Name</p>
-              <p className="mt-1 text-sm text-gray-900 dark:text-white">{volume.name}</p>
+              <p className="mt-1 text-sm text-gray-900 dark:text-white flex items-center">
+                <CopyableCode value={volume.name}>{volume.name}</CopyableCode>
+              </p>
             </div>
             <div>
               <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Size</p>
@@ -158,23 +163,27 @@ export default function VolumeDetailsPage() {
             <>
               <div>
                 <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Attached to Machine</p>
-                <p className="mt-1 text-sm text-gray-900 dark:text-white">
+                <p className="mt-1 text-sm text-gray-900 dark:text-white font-mono flex items-center">
                   <Link 
                     href={`/dashboard/apps/${appName}/machines/${volume.attached_machine_id}`}
-                    className="text-blue-600 hover:text-blue-900 font-mono"
+                    className="text-blue-600 hover:text-blue-900 flex items-center"
                   >
-                    {volume.attached_machine_id}
+                    <CopyableCode value={volume.attached_machine_id || ''}>
+                      {volume.attached_machine_id}
+                    </CopyableCode>
                   </Link>
                 </p>
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Attached to App</p>
-                <p className="mt-1 text-sm text-gray-900 dark:text-white">
+                <p className="mt-1 text-sm text-gray-900 dark:text-white flex items-center">
                   <Link 
                     href={`/dashboard/apps/${volume.attached_app_id}`}
-                    className="text-blue-600 hover:text-blue-900"
+                    className="text-blue-600 hover:text-blue-900 flex items-center"
                   >
-                    {volume.attached_app_id}
+                    <CopyableCode value={volume.attached_app_id || ''}>
+                      {volume.attached_app_id}
+                    </CopyableCode>
                   </Link>
                 </p>
               </div>
