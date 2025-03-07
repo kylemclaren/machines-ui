@@ -103,7 +103,7 @@ export default function LoginPage() {
               <div className="mt-4 text-xs text-gray-500 dark:text-gray-400">
                 <p>To get your token:</p>
                 <ol className="list-decimal list-inside pl-2 space-y-1 mt-1">
-                  <li>Download the <a href="https://fly.io/cli" target="_blank" className="text-blue-600 dark:text-blue-400 hover:underline">Fly CLI</a></li>
+                  <li>Download the <a href="https://fly.io/docs/flyctl/install/" target="_blank" className="text-blue-600 dark:text-blue-400 hover:underline">Fly CLI</a></li>
                   <li>Run <code className="bg-gray-100 dark:bg-gray-700 px-1 py-0.5 rounded">fly auth tokens create org</code> to create a new token</li> 
                   <li>Copy the generated token that begins with <code className="bg-gray-100 dark:bg-gray-700 px-1 py-0.5 rounded">FlyV1</code></li>
                   <li>Paste it here without adding "Bearer" (we add that automatically)</li>
