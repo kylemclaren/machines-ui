@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useApi } from '../../lib/api-context';
 import ThemeToggle from './ThemeToggle';
-import { ExternalLink, Menu, X } from 'lucide-react';
+import { ExternalLink, Menu, X, FileText } from 'lucide-react';
 import StatusIndicator from '@/components/ui/status-indicator';
 
 interface NavItem {
@@ -183,7 +183,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                 rel="noopener noreferrer"
                 className="flex items-center px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors group"
               >
-                <ExternalLink size={16} className="mr-2 text-gray-500 dark:text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400" />
+                <FileText size={16} className="mr-2 text-gray-500 dark:text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400" />
                 <span className="group-hover:text-blue-600 dark:group-hover:text-blue-400">Machines API Docs</span>
               </a>
               <a 
