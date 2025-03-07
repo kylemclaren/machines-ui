@@ -12,6 +12,16 @@ import toast from 'react-hot-toast';
 import { ConfirmationDialog } from '@/components/ui/confirmation-dialog';
 import { getRegionFlag, formatMemory, capitalizeMachineState } from '@/lib/utils';
 import { Play, Square, RotateCw, ExternalLink } from 'lucide-react';
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export default function AppMachinesPage() {
   const params = useParams();
@@ -178,7 +188,7 @@ export default function AppMachinesPage() {
               <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
             )}
           </div>
-          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400 pb-6">
             Manage virtual machines for this application
           </p>
         </div>
@@ -213,22 +223,44 @@ export default function AppMachinesPage() {
         <div className="p-4 border-b border-gray-200 dark:border-gray-700">
           <div className="flex flex-col sm:flex-row gap-4">
             <div className="sm:w-1/3">
-              <label htmlFor="state-filter" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Filter by State
               </label>
-              <select
-                id="state-filter"
-                className="block w-full pl-3 pr-10 py-2 text-base border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md dark:bg-gray-700 dark:text-white"
-                value={filterState || ''}
-                onChange={(e) => setFilterState(e.target.value || null)}
-              >
-                <option value="">All states</option>
-                {machineStates.map((state) => (
-                  <option key={state} value={state}>
-                    {state.charAt(0).toUpperCase() + state.slice(1)}
-                  </option>
-                ))}
-              </select>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" className="w-full justify-between bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white">
+                    {filterState ? filterState.charAt(0).toUpperCase() + filterState.slice(1) : "All states"}
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="24"
+                      height="24"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="ml-2 h-4 w-4"
+                    >
+                      <path d="m6 9 6 6 6-6" />
+                    </svg>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-56">
+                  <DropdownMenuLabel>Machine States</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuRadioGroup value={filterState || ""} onValueChange={(value) => setFilterState(value || null)}>
+                    <DropdownMenuRadioItem value="">
+                      All states
+                    </DropdownMenuRadioItem>
+                    {machineStates.map((state) => (
+                      <DropdownMenuRadioItem key={state} value={state}>
+                        {state.charAt(0).toUpperCase() + state.slice(1)}
+                      </DropdownMenuRadioItem>
+                    ))}
+                  </DropdownMenuRadioGroup>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
             <div className="sm:w-2/3">
               <label htmlFor="search-machines" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
