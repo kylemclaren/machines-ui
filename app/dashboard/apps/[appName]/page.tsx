@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useQuery } from 'react-query';
 import { useApi } from '../../../../lib/api-context';
 import flyApi from '../../../../lib/api-client';
@@ -10,7 +10,8 @@ import { TimeAgo } from "@/components/ui/time-ago";
 import { ConfirmationDialog } from '@/components/ui/confirmation-dialog';
 import toast from 'react-hot-toast';
 import { CopyableCode } from '@/components/ui/copyable-code';
-import { Trash2 } from 'lucide-react';
+import { Trash2, ExternalLink } from 'lucide-react';
+import axios from 'axios';
 
 export default function AppDetailsPage() {
   const params = useParams();
@@ -19,6 +20,9 @@ export default function AppDetailsPage() {
   const router = useRouter();
   const [isDeleting, setIsDeleting] = useState(false);
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
+  const [isAppAccessible, setIsAppAccessible] = useState(false);
+  const [isCheckingAccess, setIsCheckingAccess] = useState(false);
+  const appUrl = `https://${appName}.fly.dev`;
 
   const { data: app, isLoading, error } = useQuery(
     ['app', appName],
@@ -28,6 +32,26 @@ export default function AppDetailsPage() {
       refetchOnWindowFocus: false,
     }
   );
+
+  // Check if the app is publicly accessible
+  useEffect(() => {
+    if (app && appName) {
+      setIsCheckingAccess(true);
+      // Use our API proxy to avoid CORS issues
+      fetch(`/api/check-site?url=${encodeURIComponent(appUrl)}`)
+        .then(response => response.json())
+        .then(data => {
+          setIsAppAccessible(data.isAccessible);
+        })
+        .catch(error => {
+          console.error("Error checking app accessibility:", error);
+          setIsAppAccessible(false);
+        })
+        .finally(() => {
+          setIsCheckingAccess(false);
+        });
+    }
+  }, [app, appName, appUrl]);
 
   // Also fetch machines for this app to show count
   const { data: machines = [] } = useQuery(
@@ -123,12 +147,36 @@ export default function AppDetailsPage() {
     <div>
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{app.name}</h1>
+          <div className="flex items-center">
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{app.name}</h1>
+            {isAppAccessible && (
+              <a 
+                href={appUrl} 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="ml-2 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+                title="Open app in browser"
+              >
+                <ExternalLink size={20} />
+              </a>
+            )}
+          </div>
           <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
             App details and resources
           </p>
         </div>
         <div className="flex space-x-3">
+          {isAppAccessible && (
+            <a
+              href={appUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-4 py-2 flex items-center gap-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-100 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600"
+            >
+              <span>Open App</span>
+              <ExternalLink size={16} />
+            </a>
+          )}
           <Link
             href={`/dashboard/apps/${appName}/machines`}
             className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
