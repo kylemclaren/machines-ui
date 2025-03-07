@@ -22,6 +22,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 export default function AppMachinesPage() {
   const params = useParams();
@@ -423,33 +428,51 @@ function MachineRow({ machine, appName, onAction }: MachineRowProps) {
       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
         <div className="flex justify-end space-x-3">
           {machine.state !== 'started' && (
-            <button
-              onClick={() => onAction('action', 'start', machine.id)}
-              className="text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-300"
-              title="Start Machine"
-            >
-              <Play size={18} />
-              <span className="sr-only">Start</span>
-            </button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  onClick={() => onAction('action', 'start', machine.id)}
+                  className="text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-300 cursor-pointer"
+                >
+                  <Play size={18} />
+                  <span className="sr-only">Start</span>
+                </button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Start Machine</p>
+              </TooltipContent>
+            </Tooltip>
           )}
           {machine.state === 'started' && (
-            <button
-              onClick={() => onAction('action', 'stop', machine.id)}
-              className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
-              title="Stop Machine"
-            >
-              <Square size={18} />
-              <span className="sr-only">Stop</span>
-            </button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  onClick={() => onAction('action', 'stop', machine.id)}
+                  className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 cursor-pointer"
+                >
+                  <Square size={18} />
+                  <span className="sr-only">Stop</span>
+                </button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Stop Machine</p>
+              </TooltipContent>
+            </Tooltip>
           )}
-          <button
-            onClick={() => onAction('action', 'restart', machine.id)}
-            className="text-yellow-600 hover:text-yellow-900 dark:text-yellow-400 dark:hover:text-yellow-300"
-            title="Restart Machine"
-          >
-            <RotateCw size={18} />
-            <span className="sr-only">Restart</span>
-          </button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button
+                onClick={() => onAction('action', 'restart', machine.id)}
+                className="text-yellow-600 hover:text-yellow-900 dark:text-yellow-400 dark:hover:text-yellow-300 cursor-pointer"
+              >
+                <RotateCw size={18} />
+                <span className="sr-only">Restart</span>
+              </button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Restart Machine</p>
+            </TooltipContent>
+          </Tooltip>
         </div>
       </td>
     </tr>
