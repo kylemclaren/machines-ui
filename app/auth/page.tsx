@@ -66,7 +66,7 @@ export default function LoginPage() {
           </div>
         )}
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          <div className="rounded-md bg-white dark:bg-gray-850 p-6 shadow-sm space-y-6 border border-gray-100 dark:border-gray-700">
+          <div className="rounded-md bg-white dark:bg-gray-800 p-6 shadow-sm space-y-6 border border-gray-100 dark:border-gray-700">
             <div>
               <label htmlFor="api-token" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                 API Token
@@ -116,7 +116,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className={`group relative flex w-full justify-center rounded-md border border-transparent bg-blue-600 py-2 px-4 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${isLoading ? 'opacity-70 cursor-not-allowed' : ''}`}
+              className={`group relative flex w-full justify-center rounded-md border border-transparent bg-blue-600 py-2 px-4 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900 ${isLoading ? 'opacity-70 cursor-not-allowed' : ''}`}
             >
               {isLoading ? 'Authenticating...' : 'Authenticate'}
             </button>
