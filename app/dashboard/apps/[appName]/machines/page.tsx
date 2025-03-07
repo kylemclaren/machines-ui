@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useQuery, useQueryClient } from 'react-query';
 import { useApi } from '../../../../../lib/api-context';
 import flyApi from '../../../../../lib/api-client';
@@ -35,6 +35,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import { MachineCreateForm, MachineFormValues } from "@/components/ui/machine-create-form";
 
 export default function AppMachinesPage() {
   const params = useParams();
@@ -47,6 +48,13 @@ export default function AppMachinesPage() {
   // Confirmation dialog state
   const [confirmationOpen, setConfirmationOpen] = useState(false);
   const [confirmAction, setConfirmAction] = useState<{ type: 'action' | 'create', action?: 'start' | 'stop' | 'restart', machineId?: string } | null>(null);
+  
+  // Machine creation form state
+  const [createFormOpen, setCreateFormOpen] = useState(false);
+  const [isCreatingMachine, setIsCreatingMachine] = useState(false);
+  
+  // Additional state to track the current image at form open time
+  const [currentImageForForm, setCurrentImageForForm] = useState<string | null>(null);
 
   // Get app details
   const { data: app, isLoading: isLoadingApp } = useQuery(
@@ -58,7 +66,7 @@ export default function AppMachinesPage() {
   );
 
   // Get machines for this app
-  const { data: machines, isLoading: isLoadingMachines } = useQuery(
+  const { data: machines, isLoading: isLoadingMachines, refetch: refetchMachines } = useQuery(
     ['machines', appName, filterState],
     () => flyApi.listMachines(appName, { state: filterState || undefined }),
     {
@@ -75,7 +83,56 @@ export default function AppMachinesPage() {
   // Machine states for filtering
   const machineStates = ['started', 'stopped', 'created', 'suspended'];
 
+  // Direct function to get the latest machine's image 
+  // This fetches directly from API, bypassing any cache issues
+  const getLatestMachineImage = async () => {
+    try {
+      console.log("Fetching latest machines directly from API for image data");
+      
+      // Directly fetch latest machines from API
+      const freshMachines = await flyApi.listMachines(appName, {});
+      
+      if (!freshMachines || freshMachines.length === 0) {
+        console.log("No machines found from direct API call");
+        return null;
+      }
+      
+      // Sort machines by creation date (newest first)
+      const sortedMachines = [...freshMachines].sort((a, b) => 
+        new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      );
+      
+      // Get the most recent machine
+      const latestMachine = sortedMachines[0];
+      console.log("Latest machine from API call:", latestMachine.id);
+      
+      // Try to get image from the config
+      if (latestMachine.config && latestMachine.config.image) {
+        const imageToUse = latestMachine.config.image;
+        console.log("Using image from direct API call:", imageToUse);
+        return imageToUse;
+      }
+      
+      console.log("No image found in latest machine from API");
+      return null;
+    } catch (error) {
+      console.error("Error fetching machine data for image:", error);
+      return null;
+    }
+  };
+
+  // Handle opening the create machine form
+  const handleOpenCreateForm = async () => {
+    setCreateFormOpen(true);
+  };
+
   const openConfirmation = (type: 'action' | 'create', action?: 'start' | 'stop' | 'restart', machineId?: string) => {
+    // If it's a create action, open the form instead of confirmation dialog
+    if (type === 'create') {
+      handleOpenCreateForm();
+      return;
+    }
+    
     setConfirmAction({ type, action, machineId });
     setConfirmationOpen(true);
   };
@@ -133,15 +190,15 @@ export default function AppMachinesPage() {
     }
   };
 
-  const handleCreateMachine = async () => {
+  const handleCreateMachine = async (formValues: MachineFormValues) => {
+    setIsCreatingMachine(true);
     toast.loading('Creating a new machine...', { id: 'creating-machine' });
     
     try {
-      // Here we would normally have a form or modal for configuration
-      // For now, we'll just create a simple machine with default settings
-      const defaultConfig = {
-        name: `${appName}-${Date.now()}`,
-        region: 'sjc',
+      // Convert form values to the expected API format
+      const machineConfig = {
+        name: formValues.name || `${appName}-${Date.now()}`,
+        region: formValues.region,
         config: {
           env: {
             APP_ENV: 'production',
@@ -150,23 +207,43 @@ export default function AppMachinesPage() {
             exec: ["/bin/bash"],
             tty: true
           },
-          image: 'flyio/ubuntu:22.04',
-          services: [],
+          image: formValues.image,
+          services: [] as any[],
           guest: {
-            cpu_kind: 'shared',
-            cpus: 1,
-            memory_mb: 256
+            cpu_kind: formValues.cpuKind,
+            cpus: formValues.cpus,
+            memory_mb: formValues.memoryMb
           },
           restart: {
             policy: 'always'
           }
         }
       };
+
+      // Add service configuration if autostart or autostop is enabled
+      if (formValues.autostart || formValues.autostop) {
+        machineConfig.config.services = [
+          {
+            ports: [
+              {
+                port: 80,
+                handlers: ["http"]
+              }
+            ],
+            protocol: "tcp",
+            internal_port: 8080,
+            autostart: formValues.autostart,
+            autostop: formValues.autostop ? "stop" : "off"
+          }
+        ];
+      }
       
-      const newMachine = await flyApi.createMachine(appName, defaultConfig);
+      const newMachine = await flyApi.createMachine(appName, machineConfig);
       
       if (newMachine) {
         toast.success('Machine created successfully!', { id: 'creating-machine' });
+        // Close the form
+        setCreateFormOpen(false);
         // Refetch machines to update the list
         await queryClient.invalidateQueries(['machines', appName]);
       } else {
@@ -175,6 +252,8 @@ export default function AppMachinesPage() {
     } catch (error) {
       console.error('Error creating machine:', error);
       toast.error('Error creating machine. Please try again later.', { id: 'creating-machine' });
+    } finally {
+      setIsCreatingMachine(false);
     }
   };
 
@@ -182,7 +261,7 @@ export default function AppMachinesPage() {
     closeConfirmation();
     if (confirmAction) {
       if (confirmAction.type === 'create') {
-        handleCreateMachine();
+        handleOpenCreateForm();
       } else if (confirmAction.action && confirmAction.machineId) {
         handleMachineAction(confirmAction.machineId, confirmAction.action);
       }
@@ -191,6 +270,16 @@ export default function AppMachinesPage() {
 
   return (
     <div>
+      {/* Machine creation form */}
+      <MachineCreateForm
+        open={createFormOpen}
+        onOpenChange={setCreateFormOpen}
+        onSubmit={handleCreateMachine}
+        isLoading={isCreatingMachine}
+        appName={appName}
+        getImage={getLatestMachineImage}
+      />
+
       <div className="flex justify-between items-center mb-6">
         <Breadcrumb className="mb-4">
           <BreadcrumbList>
@@ -241,8 +330,8 @@ export default function AppMachinesPage() {
             Back to App Details
           </Link>
           <button
-            onClick={() => openConfirmation('create')}
-            className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
+            onClick={handleOpenCreateForm}
+            className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 flex items-center cursor-pointer"
           >
             Create Machine
           </button>
