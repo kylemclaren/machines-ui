@@ -7,12 +7,25 @@ import flyApi from '../../../lib/api-client';
 import Link from 'next/link';
 import { App } from '../../../types/api';
 import { TimeAgo } from "@/components/ui/time-ago";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 
 export default function AppsPage() {
   const { orgSlug, isAuthenticated } = useApi();
   const [searchTerm, setSearchTerm] = useState('');
   const [appStatuses, setAppStatuses] = useState<Record<string, string>>({});
   const [loadingStatuses, setLoadingStatuses] = useState<Record<string, boolean>>({});
+  
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 50;
 
   // Fetch the list of apps
   const { data: apps, isLoading } = useQuery(
@@ -55,9 +68,64 @@ export default function AppsPage() {
     });
   }, [apps]);
 
+  // Filter apps based on search term
   const filteredApps = apps?.filter((app) =>
     app.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  // Pagination logic
+  const totalItems = filteredApps?.length || 0;
+  const totalPages = Math.ceil(totalItems / itemsPerPage);
+  
+  // Reset to page 1 when search term changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm]);
+
+  // Calculate the current page items
+  const currentItems = filteredApps?.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  // Generate page numbers for pagination
+  const getPageNumbers = () => {
+    const pageNumbers = [];
+    const maxVisiblePages = 5;
+    
+    if (totalPages <= maxVisiblePages) {
+      // Show all pages if total is less than max visible
+      for (let i = 1; i <= totalPages; i++) {
+        pageNumbers.push(i);
+      }
+    } else {
+      // Always show first page
+      pageNumbers.push(1);
+      
+      if (currentPage > 3) {
+        pageNumbers.push(null); // Add ellipsis
+      }
+      
+      // Show pages around current page
+      const startPage = Math.max(2, currentPage - 1);
+      const endPage = Math.min(totalPages - 1, currentPage + 1);
+      
+      for (let i = startPage; i <= endPage; i++) {
+        pageNumbers.push(i);
+      }
+      
+      if (currentPage < totalPages - 2) {
+        pageNumbers.push(null); // Add ellipsis
+      }
+      
+      // Always show last page
+      if (totalPages > 1) {
+        pageNumbers.push(totalPages);
+      }
+    }
+    
+    return pageNumbers;
+  };
 
   const handleCreateApp = () => {
     // To be implemented: Modal for creating a new app
@@ -162,8 +230,8 @@ export default function AppsPage() {
                     </div>
                   </td>
                 </tr>
-              ) : filteredApps && filteredApps.length > 0 ? (
-                filteredApps.map((app) => (
+              ) : currentItems && currentItems.length > 0 ? (
+                currentItems.map((app) => (
                   <tr key={app.id} className="hover:bg-gray-50 dark:hover:bg-gray-800">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <Link
@@ -210,6 +278,61 @@ export default function AppsPage() {
             </tbody>
           </table>
         </div>
+        
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="px-4 py-3 border-t border-gray-200 dark:border-gray-700">
+            <Pagination>
+              <PaginationContent>
+                <PaginationItem>
+                  <PaginationPrevious 
+                    href="#" 
+                    onClick={(e) => {
+                      e.preventDefault();
+                      if (currentPage > 1) setCurrentPage(currentPage - 1);
+                    }}
+                    className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                  />
+                </PaginationItem>
+                
+                {getPageNumbers().map((pageNumber, index) => (
+                  <PaginationItem key={`page-${index}`}>
+                    {pageNumber === null ? (
+                      <PaginationEllipsis />
+                    ) : (
+                      <PaginationLink
+                        href="#"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          setCurrentPage(pageNumber as number);
+                        }}
+                        isActive={pageNumber === currentPage}
+                        className="cursor-pointer"
+                      >
+                        {pageNumber}
+                      </PaginationLink>
+                    )}
+                  </PaginationItem>
+                ))}
+                
+                <PaginationItem>
+                  <PaginationNext 
+                    href="#" 
+                    onClick={(e) => {
+                      e.preventDefault();
+                      if (currentPage < totalPages) setCurrentPage(currentPage + 1);
+                    }}
+                    className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                  />
+                </PaginationItem>
+              </PaginationContent>
+            </Pagination>
+            
+            <div className="mt-2 text-sm text-center text-gray-500 dark:text-gray-400">
+              Showing {Math.min((currentPage - 1) * itemsPerPage + 1, totalItems)} to {Math.min(currentPage * itemsPerPage, totalItems)} of {totalItems} applications
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
