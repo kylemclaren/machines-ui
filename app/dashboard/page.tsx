@@ -44,7 +44,7 @@ export default function DashboardPage() {
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
           <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-2">Machines</h2>
           <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
-            Monitor and control your virtual machines
+            Monitor and control your Machines
           </p>
           <Link
             href="/dashboard/machines"

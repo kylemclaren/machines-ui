@@ -189,7 +189,7 @@ export default function AppMachinesPage() {
             )}
           </div>
           <p className="mt-1 text-sm text-gray-500 dark:text-gray-400 pb-6">
-            Manage virtual machines for this application
+            Manage Machines for this application
           </p>
         </div>
         <div className="flex gap-3">
