@@ -121,7 +121,7 @@ export default function LoginPage() {
             </button>
           </div>
           <div className="text-center text-xs text-gray-500 dark:text-gray-400">
-            <p>The dashboard connects to the <a href="https://fly.io/docs/machines/api/working-with-machines-api/" className="text-blue-600 dark:text-blue-400 hover:underline" target="_blank">Fly.io Machines API</a> via Next.js API routes to avoid CORS issues.</p>
+            <p>The dashboard connects to the <a href="https://fly.io/docs/machines/api/working-with-machines-api/" className="text-blue-600 dark:text-blue-400 hover:underline" target="_blank">Fly.io Machines API</a> via server-side API routes to avoid CORS issues.</p>
             <br />
             <p>Your API token is never stored on the server.</p>
           </div>
