@@ -4,6 +4,7 @@ import { usePathname } from 'next/navigation';
 import { useApi } from '../../lib/api-context';
 import ThemeToggle from './ThemeToggle';
 import { ExternalLink, Menu, X } from 'lucide-react';
+import StatusIndicator from '@/components/ui/status-indicator';
 
 interface NavItem {
   href: string;
@@ -128,7 +129,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             </button>
           </div>
           
-          <nav className="flex-1 px-2 pt-4 pb-4 overflow-y-auto">
+          <nav className="flex flex-col flex-1 px-2 pt-4 pb-4 overflow-y-auto">
             <div className="space-y-1">
               {navItems.map((item) => {
                 const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
@@ -196,6 +197,11 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                 </svg>
                 <span className="group-hover:text-blue-600 dark:group-hover:text-blue-400">Submit an Issue</span>
               </a>
+            </div>
+            
+            {/* Status Indicator - at bottom of sidebar */}
+            <div className="mt-auto pt-4 border-t border-gray-200 dark:border-gray-700">
+              <StatusIndicator />
             </div>
           </nav>
         </div>
