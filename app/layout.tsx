@@ -4,6 +4,7 @@ import "./globals.css";
 import { ThemeProvider } from "../lib/theme-context";
 import { Toaster } from 'react-hot-toast';
 import StatusBanner from "@/components/ui/status-banner";
+import StatusIndicator from "@/components/ui/status-indicator";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -33,6 +34,7 @@ export default function RootLayout({
         <ThemeProvider>
           <StatusBanner />
           {children}
+          <StatusIndicator />
           <Toaster 
             position="top-right"
             toastOptions={{
