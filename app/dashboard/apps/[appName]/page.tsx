@@ -173,7 +173,7 @@ export default function AppDetailsPage() {
           <div className="flex items-center justify-between">
             <span className="text-2xl font-bold text-gray-900 dark:text-white">{volumes.length}</span>
             <Link
-              href={`/dashboard/volumes?app=${appName}`}
+              href={`/dashboard/apps/${appName}/volumes`}
               className="text-sm text-blue-600 dark:text-blue-400 hover:underline"
             >
               View all →

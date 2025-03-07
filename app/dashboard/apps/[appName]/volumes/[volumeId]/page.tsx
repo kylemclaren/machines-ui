@@ -56,7 +56,7 @@ export default function VolumeDetailsPage() {
           Could not retrieve details for volume "{volumeId}".
         </p>
         <Link
-          href={`/dashboard/volumes?app=${appName}`}
+          href={`/dashboard/apps/${appName}/volumes`}
           className="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-100 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600"
         >
           Back to Volumes
@@ -91,7 +91,7 @@ export default function VolumeDetailsPage() {
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
-              <BreadcrumbLink href={`/dashboard/volumes`}>
+              <BreadcrumbLink href={`/dashboard/apps/${appName}/volumes`}>
                 Volumes
               </BreadcrumbLink>
             </BreadcrumbItem>
@@ -119,7 +119,7 @@ export default function VolumeDetailsPage() {
         </div>
         <div className="flex space-x-2">
           <Link
-            href={`/dashboard/volumes?app=${appName}`}
+            href={`/dashboard/apps/${appName}/volumes`}
             className="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-100 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600"
           >
             Back to Volumes
