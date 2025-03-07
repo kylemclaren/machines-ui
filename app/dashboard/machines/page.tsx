@@ -68,9 +68,9 @@ export default function MachinesPage() {
   }
 
   return (
-    <div className="py-6">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
-        <Breadcrumb className="mb-4">
+    <div>
+      <div className="flex items-center mb-2">
+        <Breadcrumb className="w-full">
           <BreadcrumbList>
             <BreadcrumbItem>
               <BreadcrumbLink href="/dashboard">
@@ -83,11 +83,15 @@ export default function MachinesPage() {
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
-        
-        <h1 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">Machines</h1>
-        <p className="mt-2 text-sm text-gray-700 dark:text-gray-300 pb-6">
-          Manage your Fly Machines
-        </p>
+      </div>
+      
+      <div className="flex justify-between items-center mb-6">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Machines</h1>
+          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+            Manage your Fly Machines
+          </p>
+        </div>
       </div>
 
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden mb-6">
