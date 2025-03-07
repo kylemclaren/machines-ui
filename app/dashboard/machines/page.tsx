@@ -192,9 +192,6 @@ export default function MachinesPage() {
                     <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                       Created
                     </th>
-                    <th scope="col" className="relative px-6 py-3">
-                      <span className="sr-only">Actions</span>
-                    </th>
                   </tr>
                 </thead>
                 <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
@@ -231,8 +228,13 @@ function MachineRow({ machine, appName }: MachineRowProps) {
   return (
     <tr className="hover:bg-gray-50 dark:hover:bg-gray-800">
       <td className="px-6 py-4 whitespace-nowrap">
-        <div className="text-sm font-medium text-gray-900 dark:text-white">{machine.name || 'Unnamed'}</div>
-        <div className="text-xs text-gray-500 dark:text-gray-400">{machine.id}</div>
+        <Link
+          href={`/dashboard/apps/${appName}/machines/${machine.id}`}
+          className="block"
+        >
+          <div className="text-sm font-medium text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400">{machine.name || 'Unnamed'}</div>
+          <div className="text-xs text-gray-500 dark:text-gray-400">{machine.id}</div>
+        </Link>
       </td>
       <td className="px-6 py-4 whitespace-nowrap">
         <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${stateColors[machine.state] || 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'}`}>
@@ -244,14 +246,6 @@ function MachineRow({ machine, appName }: MachineRowProps) {
       </td>
       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
         <TimeAgo date={machine.created_at} />
-      </td>
-      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-        <Link
-          href={`/dashboard/apps/${appName}/machines/${machine.id}`}
-          className="text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300"
-        >
-          Details
-        </Link>
       </td>
     </tr>
   );

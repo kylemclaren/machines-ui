@@ -150,9 +150,6 @@ export default function VolumesPage() {
                     <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                       Status
                     </th>
-                    <th scope="col" className="relative px-6 py-3">
-                      <span className="sr-only">Actions</span>
-                    </th>
                   </tr>
                 </thead>
                 <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
@@ -184,8 +181,13 @@ function VolumeRow({ volume, appName }: VolumeRowProps) {
   return (
     <tr className="hover:bg-gray-50 dark:hover:bg-gray-700">
       <td className="px-6 py-4 whitespace-nowrap">
-        <div className="text-sm font-medium text-gray-900 dark:text-white">{volume.name}</div>
-        <div className="text-xs text-gray-500 dark:text-gray-400">{volume.id}</div>
+        <Link
+          href={`/dashboard/apps/${appName}/volumes/${volume.id}`}
+          className="block"
+        >
+          <div className="text-sm font-medium text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400">{volume.name}</div>
+          <div className="text-xs text-gray-500 dark:text-gray-400">{volume.id}</div>
+        </Link>
       </td>
       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
         {volume.size_gb} GB
@@ -206,14 +208,6 @@ function VolumeRow({ volume, appName }: VolumeRowProps) {
             Machine: {volume.attached_machine_id}
           </div>
         )}
-      </td>
-      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-        <Link
-          href={`/dashboard/apps/${appName}/volumes/${volume.id}`}
-          className="text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300"
-        >
-          Details
-        </Link>
       </td>
     </tr>
   );

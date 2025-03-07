@@ -166,7 +166,14 @@ export default function AppsPage() {
                 filteredApps.map((app) => (
                   <tr key={app.id} className="hover:bg-gray-50 dark:hover:bg-gray-800">
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-gray-900 dark:text-white">{app.name}</div>
+                      <Link
+                        href={`/dashboard/apps/${app.name}`}
+                        className="block"
+                      >
+                        <div className="text-sm font-medium text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400">
+                          {app.name}
+                        </div>
+                      </Link>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-500 dark:text-gray-400">{app.organization?.slug || 'unknown'}</div>
@@ -184,12 +191,6 @@ export default function AppsPage() {
                       )}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                      <Link
-                        href={`/dashboard/apps/${app.name}`}
-                        className="text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300 mr-4"
-                      >
-                        Details
-                      </Link>
                       <Link
                         href={`/dashboard/apps/${app.name}/machines`}
                         className="text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300"

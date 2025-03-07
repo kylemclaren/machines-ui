@@ -388,8 +388,13 @@ function MachineRow({ machine, appName, onAction }: MachineRowProps) {
   return (
     <tr className="hover:bg-gray-50 dark:hover:bg-gray-800">
       <td className="px-6 py-4 whitespace-nowrap">
-        <div className="text-sm font-medium text-gray-900 dark:text-white">{machine.name || 'Unnamed'}</div>
-        <div className="text-xs text-gray-500 dark:text-gray-400 font-mono">{machine.id}</div>
+        <Link
+          href={`/dashboard/apps/${appName}/machines/${machine.id}`}
+          className="block"
+        >
+          <div className="text-sm font-medium text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400">{machine.name || 'Unnamed'}</div>
+          <div className="text-xs text-gray-500 dark:text-gray-400 font-mono">{machine.id}</div>
+        </Link>
       </td>
       <td className="px-6 py-4 whitespace-nowrap">
         <div className="flex items-center">
@@ -445,14 +450,6 @@ function MachineRow({ machine, appName, onAction }: MachineRowProps) {
             <RotateCw size={18} />
             <span className="sr-only">Restart</span>
           </button>
-          <Link
-            href={`/dashboard/apps/${appName}/machines/${machine.id}`}
-            className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300"
-            title="View Machine Details"
-          >
-            <ExternalLink size={18} />
-            <span className="sr-only">View</span>
-          </Link>
         </div>
       </td>
     </tr>
