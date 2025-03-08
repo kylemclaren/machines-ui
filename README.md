@@ -26,8 +26,8 @@ A modern dashboard for managing your Fly.io resources through the Machines API. 
 
 1. Clone the repository
    ```bash
-   git clone https://github.com/kylemclaren/machines-dash.git
-   cd machines-dash
+   git clone https://github.com/kylemclaren/machines-ui.git
+   cd machines-ui
    ```
 
 2. Install dependencies

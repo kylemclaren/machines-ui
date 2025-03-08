@@ -2,7 +2,7 @@
   "lockfileVersion": 1,
   "workspaces": {
     "": {
-      "name": "machines-dash",
+      "name": "machines-ui",
       "dependencies": {
         "@flydotio/dockerfile": "^0.7.8",
         "@hookform/resolvers": "^4.1.3",
