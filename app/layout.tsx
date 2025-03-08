@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "../lib/theme-context";
-import { Toaster } from 'react-hot-toast';
 import StatusBanner from "@/components/ui/status-banner";
+import { ThemeAwareToaster } from "@/components/ui/theme-aware-toaster";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -33,17 +33,7 @@ export default function RootLayout({
         <ThemeProvider>
           <StatusBanner />
           {children}
-          <Toaster 
-            position="top-right"
-            toastOptions={{
-              duration: 3000,
-              style: {
-                background: 'var(--color-background)',
-                color: 'var(--color-text)',
-                border: '1px solid var(--color-border)',
-              },
-            }}
-          />
+          <ThemeAwareToaster />
         </ThemeProvider>
       </body>
     </html>
