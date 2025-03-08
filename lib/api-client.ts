@@ -272,6 +272,27 @@ class FlyMachinesApiClient {
     }
   }
 
+  async execMachine(appName: string, machineId: string, command: string[]): Promise<{ exit_code: number; stdout: string; stderr: string; exit_signal?: number } | null> {
+    try {
+      console.log('Executing command on machine:', { appName, machineId, command });
+      
+      // Send according to API documentation - use 'command' as array
+      const response = await this.client.post<{ exit_code: number; stdout: string; stderr: string; exit_signal?: number }>(
+        `/apps/${appName}/machines/${machineId}/exec`,
+        { 
+          command: command, // Send as array of strings
+          timeout: 30 // Default timeout of 30 seconds
+        }
+      );
+      
+      console.log('Exec response:', response.data);
+      return response.data;
+    } catch (error) {
+      this.handleError(error as AxiosError);
+      return null;
+    }
+  }
+
   // Volumes
   async listVolumes(appName: string): Promise<Volume[]> {
     try {
