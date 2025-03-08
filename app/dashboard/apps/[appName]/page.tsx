@@ -12,6 +12,12 @@ import toast from 'react-hot-toast';
 import { CopyableCode } from '@/components/ui/copyable-code';
 import { Trash2, ExternalLink } from 'lucide-react';
 import axios from 'axios';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 export default function AppDetailsPage() {
   const params = useParams();
@@ -150,15 +156,28 @@ export default function AppDetailsPage() {
           <div className="flex items-center">
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{app.name}</h1>
             {isAppAccessible && (
-              <a 
-                href={appUrl} 
-                target="_blank" 
-                rel="noopener noreferrer" 
-                className="ml-2 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
-                title="Open app in browser"
-              >
-                <ExternalLink size={20} />
-              </a>
+              <TooltipProvider>
+                <Tooltip delayDuration={200}>
+                  <TooltipTrigger asChild>
+                    <a 
+                      href={appUrl} 
+                      target="_blank" 
+                      rel="noopener noreferrer" 
+                      className="ml-2 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 transition-colors duration-200"
+                    >
+                      <ExternalLink size={20} className="hover:scale-110 transition-transform duration-200" />
+                    </a>
+                  </TooltipTrigger>
+                  <TooltipContent 
+                    side="top" 
+                    align="center" 
+                    sideOffset={5} 
+                    className="bg-gray-900 text-white dark:bg-white dark:text-gray-900 px-3 py-1.5 text-xs font-medium rounded-md shadow-lg border border-gray-800 dark:border-gray-200"
+                  >
+                    Visit {app.name}.fly.dev
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
             )}
           </div>
           <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
@@ -166,17 +185,6 @@ export default function AppDetailsPage() {
           </p>
         </div>
         <div className="flex space-x-3">
-          {isAppAccessible && (
-            <a
-              href={appUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="px-4 py-2 flex items-center gap-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-100 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600"
-            >
-              <span>Open App</span>
-              <ExternalLink size={16} />
-            </a>
-          )}
           <Link
             href={`/dashboard/apps/${appName}/machines`}
             className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
