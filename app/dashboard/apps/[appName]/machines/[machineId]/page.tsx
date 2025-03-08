@@ -13,6 +13,7 @@ import { ConfirmationDialog } from '@/components/ui/confirmation-dialog';
 import { getRegionFlag, formatMemory, capitalizeMachineState } from '@/lib/utils';
 import { Play, Square, RotateCw, Trash2, Menu } from 'lucide-react';
 import { CopyableCode } from '@/components/ui/copyable-code';
+import { CopyableJson } from '@/components/ui/copyable-json';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -345,6 +346,12 @@ export default function MachineDetailsPage() {
               </p>
             </div>
             <div>
+              <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Private IP</p>
+              <p className="mt-1 text-sm text-gray-900 dark:text-white font-mono flex items-center">
+                <CopyableCode value={machine.private_ip}>{machine.private_ip}</CopyableCode>
+              </p>
+            </div>
+            <div>
               <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Created</p>
               <p className="mt-1 text-sm text-gray-900 dark:text-white">
                 <TimeAgo date={machine.created_at} />
@@ -426,24 +433,16 @@ export default function MachineDetailsPage() {
         </div>
         
         {machine.config.env && Object.keys(machine.config.env).length > 0 && (
-          <div className="mt-6">
+          <div className="mt-0">
             <h3 className="text-md font-medium text-gray-800 dark:text-gray-200 mb-2">Environment Variables</h3>
-            <div className="bg-gray-50 dark:bg-gray-900 p-3 rounded-md overflow-auto max-h-60">
-              <pre className="text-sm text-gray-700 dark:text-gray-300 font-mono">
-                {JSON.stringify(machine.config.env, null, 2)}
-              </pre>
-            </div>
+            <CopyableJson data={machine.config.env} />
           </div>
         )}
         
         {machine.config.services && machine.config.services.length > 0 && (
           <div className="mt-6">
             <h3 className="text-md font-medium text-gray-800 dark:text-gray-200 mb-2">Services</h3>
-            <div className="bg-gray-50 dark:bg-gray-900 p-3 rounded-md overflow-auto max-h-60">
-              <pre className="text-sm text-gray-700 dark:text-gray-300 font-mono">
-                {JSON.stringify(machine.config.services, null, 2)}
-              </pre>
-            </div>
+            <CopyableJson data={machine.config.services} />
           </div>
         )}
         
@@ -455,11 +454,7 @@ export default function MachineDetailsPage() {
               <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
             </div>
           ) : metadata && Object.keys(metadata).length > 0 ? (
-            <div className="bg-gray-50 dark:bg-gray-900 p-3 rounded-md overflow-auto max-h-60">
-              <pre className="text-sm text-gray-700 dark:text-gray-300 font-mono">
-                {JSON.stringify(metadata, null, 2)}
-              </pre>
-            </div>
+            <CopyableJson data={metadata} />
           ) : (
             <div className="bg-gray-50 dark:bg-gray-900 p-3 rounded-md">
               <p className="text-sm text-gray-500 dark:text-gray-400">No metadata available for this machine</p>
