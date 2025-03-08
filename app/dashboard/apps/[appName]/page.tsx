@@ -151,7 +151,7 @@ export default function AppDetailsPage() {
 
   return (
     <div>
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-6">
         <div>
           <div className="flex items-center">
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{app.name}</h1>
@@ -184,17 +184,17 @@ export default function AppDetailsPage() {
             App details and resources
           </p>
         </div>
-        <div className="flex space-x-3">
+        <div className="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-3 mt-4 md:mt-0 w-full md:w-auto">
           <Link
             href={`/dashboard/apps/${appName}/machines`}
-            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+            className="w-full md:w-auto px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center justify-center"
           >
             View Machines
           </Link>
           <button
             onClick={openDeleteConfirm}
             disabled={isDeleting}
-            className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer"
+            className="w-full md:w-auto px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer flex items-center justify-center"
           >
             {isDeleting ? 'Deleting...' : 'Delete App'}
           </button>
