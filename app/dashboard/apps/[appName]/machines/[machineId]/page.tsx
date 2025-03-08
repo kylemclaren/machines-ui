@@ -11,7 +11,7 @@ import { TimeAgo } from "@/components/ui/time-ago";
 import toast from 'react-hot-toast';
 import { ConfirmationDialog } from '@/components/ui/confirmation-dialog';
 import { getRegionFlag, formatMemory, capitalizeMachineState } from '@/lib/utils';
-import { Play, Square, RotateCw, Trash2, Menu } from 'lucide-react';
+import { Play, Square, RotateCw, Trash2, Menu, PauseCircle } from 'lucide-react';
 import { CopyableCode } from '@/components/ui/copyable-code';
 import { CopyableJson } from '@/components/ui/copyable-json';
 import {
@@ -38,7 +38,7 @@ export default function MachineDetailsPage() {
   const queryClient = useQueryClient();
   const [isLoading, setIsLoading] = useState(false);
   const [confirmationOpen, setConfirmationOpen] = useState(false);
-  const [confirmAction, setConfirmAction] = useState<'start' | 'stop' | 'restart' | 'delete' | null>(null);
+  const [confirmAction, setConfirmAction] = useState<'start' | 'stop' | 'restart' | 'delete' | 'suspend' | null>(null);
 
   // Get machine details
   const { data: machine, isLoading: isMachineLoading, error } = useQuery(
@@ -68,7 +68,7 @@ export default function MachineDetailsPage() {
     }
   );
 
-  const openConfirmation = (action: 'start' | 'stop' | 'restart' | 'delete') => {
+  const openConfirmation = (action: 'start' | 'stop' | 'restart' | 'delete' | 'suspend') => {
     setConfirmAction(action);
     setConfirmationOpen(true);
   };
@@ -80,16 +80,26 @@ export default function MachineDetailsPage() {
   const getConfirmationMessage = () => {
     if (!confirmAction) return { title: '', description: '' };
     
-    return {
-      title: `${confirmAction.charAt(0).toUpperCase() + confirmAction.slice(1)} Machine?`,
-      description: confirmAction === 'delete' 
-        ? 'This action cannot be undone. This will permanently delete this machine and all associated data.'
-        : `Are you sure you want to ${confirmAction} this machine?`
+    const actionMap = {
+      start: { title: 'Start Machine?', description: 'Are you sure you want to start this machine?' },
+      stop: { title: 'Stop Machine?', description: 'Are you sure you want to stop this machine?' },
+      restart: { title: 'Restart Machine?', description: 'Are you sure you want to restart this machine?' },
+      delete: { 
+        title: 'Delete Machine?', 
+        description: 'This action cannot be undone. This will permanently delete this machine and all associated data.' 
+      },
+      suspend: {
+        title: 'Suspend Machine?',
+        description: 'This will pause the machine and preserve its memory state. You can resume it later.'
+      }
     };
+    
+    return actionMap[confirmAction];
   };
 
-  const handleMachineAction = async (action: 'start' | 'stop' | 'restart' | 'delete') => {
-    const toastId = toast.loading(`${action.charAt(0).toUpperCase() + action.slice(1)}ing machine...`);
+  const handleMachineAction = async (action: 'start' | 'stop' | 'restart' | 'delete' | 'suspend') => {
+    let actionText = action === 'suspend' ? 'suspending' : `${action}ing`;
+    const toastId = toast.loading(`${actionText.charAt(0).toUpperCase() + actionText.slice(1)} machine...`);
     setIsLoading(true);
 
     try {
@@ -113,13 +123,16 @@ export default function MachineDetailsPage() {
             return;
           }
           break;
+        case 'suspend':
+          success = await flyApi.suspendMachine(appName, machineId);
+          break;
       }
 
       if (success) {
-        toast.success(`Machine ${action}ed successfully`, { id: toastId });
-        // Refetch machine data to get the updated state
-        queryClient.invalidateQueries(['machine', appName, machineId]);
-        queryClient.invalidateQueries(['machine-events', appName, machineId]);
+        const pastTense = `${action}${action === 'stop' ? 'p' : ''}ed`;
+        toast.success(`Machine ${pastTense} successfully`, { id: toastId });
+        // Refetch machine to update UI
+        await queryClient.invalidateQueries(['machine', appName, machineId]);
       } else {
         toast.error(`Failed to ${action} machine`, { id: toastId });
       }
@@ -240,7 +253,7 @@ export default function MachineDetailsPage() {
               <button
                 onClick={() => openConfirmation('start')}
                 disabled={isLoading}
-                className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50 flex items-center"
+                className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50 flex items-center cursor-pointer"
               >
                 <Play size={18} className="mr-2" />
                 Start
@@ -250,7 +263,7 @@ export default function MachineDetailsPage() {
               <button
                 onClick={() => openConfirmation('stop')}
                 disabled={isLoading}
-                className="px-4 py-2 bg-yellow-600 text-white rounded-md hover:bg-yellow-700 disabled:opacity-50 flex items-center"
+                className="px-4 py-2 bg-yellow-600 text-white rounded-md hover:bg-yellow-700 disabled:opacity-50 flex items-center cursor-pointer"
               >
                 <Square size={18} className="mr-2" />
                 Stop
@@ -259,15 +272,25 @@ export default function MachineDetailsPage() {
             <button
               onClick={() => openConfirmation('restart')}
               disabled={isLoading}
-              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 flex items-center"
+              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 flex items-center cursor-pointer"
             >
               <RotateCw size={18} className="mr-2" />
               Restart
             </button>
+            {machine.state === 'started' && (
+              <button
+                onClick={() => openConfirmation('suspend')}
+                disabled={isLoading}
+                className="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 disabled:opacity-50 flex items-center cursor-pointer"
+              >
+                <PauseCircle size={18} className="mr-2" />
+                Suspend
+              </button>
+            )}
             <button
               onClick={() => openConfirmation('delete')}
               disabled={isLoading}
-              className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:opacity-50 flex items-center"
+              className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:opacity-50 flex items-center cursor-pointer"
             >
               <Trash2 size={18} className="mr-2" />
               Delete
@@ -278,7 +301,7 @@ export default function MachineDetailsPage() {
           <div className="md:hidden w-full">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <button className="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 flex items-center justify-center">
+                <button className="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 flex items-center justify-center cursor-pointer">
                   <Menu size={18} className="mr-2" />
                   Actions
                 </button>
@@ -312,6 +335,16 @@ export default function MachineDetailsPage() {
                   <RotateCw size={16} className="mr-2" />
                   Restart
                 </DropdownMenuItem>
+                {machine.state === 'started' && (
+                  <DropdownMenuItem 
+                    onClick={() => openConfirmation('suspend')}
+                    disabled={isLoading}
+                    className="cursor-pointer"
+                  >
+                    <PauseCircle size={16} className="mr-2" />
+                    Suspend
+                  </DropdownMenuItem>
+                )}
                 <DropdownMenuItem 
                   onClick={() => openConfirmation('delete')}
                   disabled={isLoading}
