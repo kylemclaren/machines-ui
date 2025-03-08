@@ -215,7 +215,7 @@ export default function AppsPage() {
         </div>
         <button
           onClick={handleCreateApp}
-          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 cursor-pointer"
         >
           Create App
         </button>
