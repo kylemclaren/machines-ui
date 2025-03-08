@@ -81,7 +81,7 @@ export default function DashboardPage() {
               </div>
             </div>
           ) : apps && apps.length > 0 ? (
-            apps.slice(0, 5).map((app) => (
+            [...apps].reverse().slice(0, 5).map((app) => (
               <div key={app.id} className="p-6">
                 <div className="flex justify-between items-center">
                   <div>

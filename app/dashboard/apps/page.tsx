@@ -78,7 +78,7 @@ export default function AppsPage() {
   // Filter apps based on search term
   const filteredApps = apps?.filter((app) =>
     app.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  ).sort((a, b) => a.name.localeCompare(b.name));
 
   // Pagination logic
   const totalItems = filteredApps?.length || 0;
