@@ -132,7 +132,10 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           <nav className="flex flex-col flex-1 px-2 pt-4 pb-4 overflow-y-auto">
             <div className="space-y-1">
               {navItems.map((item) => {
-                const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
+                const isActive = item.href === '/dashboard' 
+                  ? pathname === '/dashboard'
+                  : pathname === item.href || pathname.startsWith(`${item.href}/`);
+                
                 return (
                   <Link
                     key={item.href}
