@@ -242,6 +242,16 @@ class FlyMachinesApiClient {
     }
   }
 
+  async suspendMachine(appName: string, machineId: string): Promise<boolean> {
+    try {
+      await this.client.post(`/apps/${appName}/machines/${machineId}/suspend`);
+      return true;
+    } catch (error) {
+      this.handleError(error as AxiosError);
+      return false;
+    }
+  }
+
   async getMachineEvents(appName: string, machineId: string): Promise<MachineEvent[]> {
     try {
       const response = await this.client.get<MachineEvent[]>(`/apps/${appName}/machines/${machineId}/events`);
