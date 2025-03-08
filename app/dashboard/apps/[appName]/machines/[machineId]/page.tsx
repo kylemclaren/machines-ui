@@ -11,7 +11,7 @@ import { TimeAgo } from "@/components/ui/time-ago";
 import toast from 'react-hot-toast';
 import { ConfirmationDialog } from '@/components/ui/confirmation-dialog';
 import { getRegionFlag, formatMemory, capitalizeMachineState } from '@/lib/utils';
-import { Play, Square, RotateCw, Trash2 } from 'lucide-react';
+import { Play, Square, RotateCw, Trash2, Menu } from 'lucide-react';
 import { CopyableCode } from '@/components/ui/copyable-code';
 import {
   Breadcrumb,
@@ -21,6 +21,12 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export default function MachineDetailsPage() {
   const params = useParams();
@@ -193,7 +199,7 @@ export default function MachineDetailsPage() {
         </Breadcrumb>
       </div>
       
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-6">
         <div>
           <div className="flex items-center">
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
@@ -210,14 +216,16 @@ export default function MachineDetailsPage() {
             Machine details and configuration
           </p>
         </div>
-        <div className="flex space-x-2">
+        <div className="flex space-x-2 mt-4 md:mt-0">
           <Link
             href={`/dashboard/apps/${appName}/machines`}
-            className="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-100 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600"
+            className="hidden md:inline-flex px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-100 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 items-center"
           >
             Back to Machines
           </Link>
-          <div className="flex space-x-2">
+          
+          {/* Desktop view - Regular buttons */}
+          <div className="hidden md:flex space-x-2">
             {machine.state !== 'started' && (
               <button
                 onClick={() => openConfirmation('start')}
@@ -254,6 +262,56 @@ export default function MachineDetailsPage() {
               <Trash2 size={18} className="mr-2" />
               Delete
             </button>
+          </div>
+          
+          {/* Mobile view - Dropdown menu */}
+          <div className="md:hidden w-full">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button className="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 flex items-center justify-center">
+                  <Menu size={18} className="mr-2" />
+                  Actions
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-40">
+                {machine.state !== 'started' && (
+                  <DropdownMenuItem 
+                    onClick={() => openConfirmation('start')}
+                    disabled={isLoading}
+                    className="cursor-pointer"
+                  >
+                    <Play size={16} className="mr-2" />
+                    Start
+                  </DropdownMenuItem>
+                )}
+                {machine.state === 'started' && (
+                  <DropdownMenuItem 
+                    onClick={() => openConfirmation('stop')}
+                    disabled={isLoading}
+                    className="cursor-pointer"
+                  >
+                    <Square size={16} className="mr-2" />
+                    Stop
+                  </DropdownMenuItem>
+                )}
+                <DropdownMenuItem 
+                  onClick={() => openConfirmation('restart')}
+                  disabled={isLoading}
+                  className="cursor-pointer"
+                >
+                  <RotateCw size={16} className="mr-2" />
+                  Restart
+                </DropdownMenuItem>
+                <DropdownMenuItem 
+                  onClick={() => openConfirmation('delete')}
+                  disabled={isLoading}
+                  className="cursor-pointer text-red-600 focus:text-red-600 focus:bg-red-50 dark:focus:bg-red-950"
+                >
+                  <Trash2 size={16} className="mr-2" />
+                  Delete
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
       </div>
