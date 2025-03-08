@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import flyApi from '../../lib/api-client';
+import { Github } from 'lucide-react';
 
 export default function LoginPage() {
   const [token, setToken] = useState('');
@@ -137,6 +138,17 @@ export default function LoginPage() {
             <p>Your API token is never stored on the server.</p>
           </div>
         </form>
+        <div className="mt-8 text-center">
+          <a 
+            href="https://github.com/kylemclaren/machines-ui" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition-colors"
+          >
+            <Github className="w-3.5 h-3.5" />
+            kylemclaren/machines-ui
+          </a>
+        </div>
       </div>
     </div>
   );
