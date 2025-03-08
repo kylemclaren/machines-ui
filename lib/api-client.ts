@@ -10,6 +10,7 @@ import {
   CreateMachineRequest,
   UpdateMachineRequest,
   MachineEvent,
+  MachineMetadata,
 } from '../types/api';
 
 // Use our Next.js API proxy to avoid CORS issues
@@ -243,13 +244,21 @@ class FlyMachinesApiClient {
 
   async getMachineEvents(appName: string, machineId: string): Promise<MachineEvent[]> {
     try {
-      const response = await this.client.get<MachineEvent[]>(
-        `/apps/${appName}/machines/${machineId}/events`
-      );
+      const response = await this.client.get<MachineEvent[]>(`/apps/${appName}/machines/${machineId}/events`);
       return response.data;
     } catch (error) {
       this.handleError(error as AxiosError);
       return [];
+    }
+  }
+
+  async getMachineMetadata(appName: string, machineId: string): Promise<MachineMetadata | null> {
+    try {
+      const response = await this.client.get<MachineMetadata>(`/apps/${appName}/machines/${machineId}/metadata`);
+      return response.data;
+    } catch (error) {
+      this.handleError(error as AxiosError);
+      return null;
     }
   }
 

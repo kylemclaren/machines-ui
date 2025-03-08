@@ -67,8 +67,14 @@ export interface MachineEvent {
   id: string;
   type: string;
   status: string;
-  description: string;
+  source: string;
   timestamp: string;
+  request?: Record<string, any>;
+  data?: Record<string, any>;
+}
+
+export interface MachineMetadata {
+  [key: string]: string | number | boolean | null | Record<string, any>;
 }
 
 export interface Volume {

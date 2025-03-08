@@ -58,6 +58,15 @@ export default function MachineDetailsPage() {
     }
   );
 
+  // Get machine metadata
+  const { data: metadata, isLoading: isLoadingMetadata } = useQuery(
+    ['machine-metadata', appName, machineId],
+    () => flyApi.getMachineMetadata(appName, machineId),
+    {
+      enabled: isAuthenticated && !!appName && !!machineId,
+    }
+  );
+
   const openConfirmation = (action: 'start' | 'stop' | 'restart' | 'delete') => {
     setConfirmAction(action);
     setConfirmationOpen(true);
@@ -437,6 +446,26 @@ export default function MachineDetailsPage() {
             </div>
           </div>
         )}
+        
+        {/* Machine Metadata */}
+        <div className="mt-6">
+          <h3 className="text-md font-medium text-gray-800 dark:text-gray-200 mb-2">Metadata</h3>
+          {isLoadingMetadata ? (
+            <div className="flex justify-center p-4">
+              <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+            </div>
+          ) : metadata && Object.keys(metadata).length > 0 ? (
+            <div className="bg-gray-50 dark:bg-gray-900 p-3 rounded-md overflow-auto max-h-60">
+              <pre className="text-sm text-gray-700 dark:text-gray-300 font-mono">
+                {JSON.stringify(metadata, null, 2)}
+              </pre>
+            </div>
+          ) : (
+            <div className="bg-gray-50 dark:bg-gray-900 p-3 rounded-md">
+              <p className="text-sm text-gray-500 dark:text-gray-400">No metadata available for this machine</p>
+            </div>
+          )}
+        </div>
       </div>
 
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
