@@ -11,7 +11,7 @@ import { TimeAgo } from "@/components/ui/time-ago";
 import toast from 'react-hot-toast';
 import { ConfirmationDialog } from '@/components/ui/confirmation-dialog';
 import { getRegionFlag, formatMemory, capitalizeMachineState } from '@/lib/utils';
-import { Play, Square, RotateCw, ExternalLink } from 'lucide-react';
+import { Play, Square, RotateCw, ExternalLink, PauseCircle } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -47,7 +47,7 @@ export default function AppMachinesPage() {
   
   // Confirmation dialog state
   const [confirmationOpen, setConfirmationOpen] = useState(false);
-  const [confirmAction, setConfirmAction] = useState<{ type: 'action' | 'create', action?: 'start' | 'stop' | 'restart', machineId?: string } | null>(null);
+  const [confirmAction, setConfirmAction] = useState<{ type: 'action' | 'create', action?: 'start' | 'stop' | 'restart' | 'suspend', machineId?: string } | null>(null);
   
   // Machine creation form state
   const [createFormOpen, setCreateFormOpen] = useState(false);
@@ -126,7 +126,7 @@ export default function AppMachinesPage() {
     setCreateFormOpen(true);
   };
 
-  const openConfirmation = (type: 'action' | 'create', action?: 'start' | 'stop' | 'restart', machineId?: string) => {
+  const openConfirmation = (type: 'action' | 'create', action?: 'start' | 'stop' | 'restart' | 'suspend', machineId?: string) => {
     // If it's a create action, open the form instead of confirmation dialog
     if (type === 'create') {
       handleOpenCreateForm();
@@ -159,8 +159,9 @@ export default function AppMachinesPage() {
     return { title: '', description: '' };
   };
 
-  const handleMachineAction = async (machineId: string, action: 'start' | 'stop' | 'restart') => {
-    const toastId = toast.loading(`${action.charAt(0).toUpperCase() + action.slice(1)}ing machine...`);
+  const handleMachineAction = async (machineId: string, action: 'start' | 'stop' | 'restart' | 'suspend') => {
+    const actionText = action === 'suspend' ? 'suspending' : `${action}ing`;
+    const toastId = toast.loading(`${actionText.charAt(0).toUpperCase() + actionText.slice(1)} machine...`);
 
     try {
       let success = false;
@@ -175,18 +176,22 @@ export default function AppMachinesPage() {
         case 'restart':
           success = await flyApi.restartMachine(appName, machineId);
           break;
+        case 'suspend':
+          success = await flyApi.suspendMachine(appName, machineId);
+          break;
       }
 
       if (success) {
-        toast.success(`Machine ${action}ed successfully`, { id: toastId });
+        const pastTense = action === 'suspend' ? 'suspended' : `${action}${action === 'stop' ? 'p' : ''}ed`;
+        toast.success(`Machine ${pastTense} successfully`, { id: toastId });
         // Refetch machines to update the list
         await queryClient.invalidateQueries(['machines', appName]);
       } else {
         toast.error(`Failed to ${action} machine`, { id: toastId });
       }
     } catch (error) {
-      console.error(`Error ${action}ing machine:`, error);
-      toast.error(`Error ${action}ing machine. Please try again later.`, { id: toastId });
+      console.error(`Error ${actionText} machine:`, error);
+      toast.error(`Error ${actionText} machine. Please try again later.`, { id: toastId });
     }
   };
 
@@ -504,7 +509,7 @@ export default function AppMachinesPage() {
 interface MachineRowProps {
   machine: Machine;
   appName: string;
-  onAction: (type: 'action' | 'create', action?: 'start' | 'stop' | 'restart', machineId?: string) => void;
+  onAction: (type: 'action' | 'create', action?: 'start' | 'stop' | 'restart' | 'suspend', machineId?: string) => void;
 }
 
 function MachineRow({ machine, appName, onAction }: MachineRowProps) {
@@ -581,6 +586,22 @@ function MachineRow({ machine, appName, onAction }: MachineRowProps) {
               </TooltipTrigger>
               <TooltipContent>
                 <p>Stop Machine</p>
+              </TooltipContent>
+            </Tooltip>
+          )}
+          {machine.state === 'started' && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  onClick={() => onAction('action', 'suspend', machine.id)}
+                  className="text-purple-600 hover:text-purple-900 dark:text-purple-400 dark:hover:text-purple-300 cursor-pointer"
+                >
+                  <PauseCircle size={18} />
+                  <span className="sr-only">Suspend</span>
+                </button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Suspend Machine</p>
               </TooltipContent>
             </Tooltip>
           )}
