@@ -1,12 +1,15 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useQuery } from 'react-query';
+import { useQuery, useQueryClient } from 'react-query';
+import { useRouter } from 'next/navigation';
 import { useApi } from '../../../lib/api-context';
 import flyApi from '../../../lib/api-client';
 import Link from 'next/link';
 import { App } from '../../../types/api';
 import { TimeAgo } from "@/components/ui/time-ago";
+import toast from 'react-hot-toast';
+import { AppCreateForm, AppFormValues } from '@/components/ui/app-create-form';
 import {
   Pagination,
   PaginationContent,
@@ -18,10 +21,14 @@ import {
 } from "@/components/ui/pagination";
 
 export default function AppsPage() {
+  const router = useRouter();
   const { orgSlug, isAuthenticated } = useApi();
   const [searchTerm, setSearchTerm] = useState('');
   const [appStatuses, setAppStatuses] = useState<Record<string, string>>({});
   const [loadingStatuses, setLoadingStatuses] = useState<Record<string, boolean>>({});
+  const [createAppOpen, setCreateAppOpen] = useState(false);
+  const [isCreatingApp, setIsCreatingApp] = useState(false);
+  const queryClient = useQueryClient();
   
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
@@ -128,8 +135,52 @@ export default function AppsPage() {
   };
 
   const handleCreateApp = () => {
-    // To be implemented: Modal for creating a new app
-    console.log('Create app clicked');
+    setCreateAppOpen(true);
+  };
+
+  const handleSubmitApp = async (values: AppFormValues) => {
+    setIsCreatingApp(true);
+    const toastId = toast.loading('Creating a new app...');
+
+    try {
+      // Prepare app creation data
+      const createAppData = {
+        app_name: values.app_name,
+        org_slug: values.org_slug
+      };
+      
+      // Add optional fields if provided
+      if (values.network) {
+        // @ts-ignore - The API client expects CreateAppRequest type but doesn't have network field
+        createAppData.network = values.network;
+      }
+      
+      if (values.enable_subdomains) {
+        // @ts-ignore - Same reason
+        createAppData.enable_subdomains = values.enable_subdomains;
+      }
+
+      // Call API to create app
+      const newApp = await flyApi.createApp(createAppData);
+      
+      if (newApp) {
+        toast.success(`App "${values.app_name}" created successfully!`, { id: toastId });
+        setCreateAppOpen(false);
+        
+        // Refresh the apps list
+        await queryClient.invalidateQueries(['apps', orgSlug]);
+        
+        // Redirect to the new app's details page
+        router.push(`/dashboard/apps/${values.app_name}`);
+      } else {
+        toast.error('Failed to create app. Please try again.', { id: toastId });
+      }
+    } catch (error) {
+      console.error('Error creating app:', error);
+      toast.error('An error occurred while creating the app. Please try again.', { id: toastId });
+    } finally {
+      setIsCreatingApp(false);
+    }
   };
 
   // Get appropriate color for the status
@@ -146,6 +197,15 @@ export default function AppsPage() {
 
   return (
     <div>
+      {/* App creation form */}
+      <AppCreateForm
+        open={createAppOpen}
+        onOpenChange={setCreateAppOpen}
+        onSubmit={handleSubmitApp}
+        isLoading={isCreatingApp}
+        organizations={[{ slug: orgSlug, name: orgSlug }]} // In a real app, you'd have a list of orgs
+      />
+
       <div className="flex justify-between items-center mb-6">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Applications</h1>

@@ -113,6 +113,17 @@ class FlyMachinesApiClient {
 
   async createApp(data: CreateAppRequest): Promise<App | null> {
     try {
+      console.log('Creating app with data:', data);
+      // Ensure required fields are present
+      if (!data.app_name) {
+        console.error('app_name is required for app creation');
+        return null;
+      }
+      if (!data.org_slug) {
+        console.error('org_slug is required for app creation');
+        return null;
+      }
+      
       const response = await this.client.post<App>('/apps', data);
       return response.data;
     } catch (error) {

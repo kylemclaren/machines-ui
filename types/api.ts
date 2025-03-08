@@ -85,8 +85,10 @@ export interface Volume {
 }
 
 export interface CreateAppRequest {
-  name: string;
+  app_name: string;
   org_slug: string;
+  network?: string;
+  enable_subdomains?: boolean;
 }
 
 export interface CreateMachineRequest {
