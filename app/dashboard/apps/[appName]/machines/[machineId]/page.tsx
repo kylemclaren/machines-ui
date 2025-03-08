@@ -413,24 +413,6 @@ export default function MachineDetailsPage() {
 
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 mb-8">
         <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-4">Configuration</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <h3 className="text-md font-medium text-gray-800 dark:text-gray-200 mb-2">Image</h3>
-            <div className="bg-gray-50 dark:bg-gray-900 p-3 rounded-md">
-              <p className="text-sm text-gray-700 dark:text-gray-300 font-mono break-all">
-                {machine.config.image}
-              </p>
-            </div>
-          </div>
-          <div>
-            <h3 className="text-md font-medium text-gray-800 dark:text-gray-200 mb-2">Restart Policy</h3>
-            <div className="bg-gray-50 dark:bg-gray-900 p-3 rounded-md">
-              <p className="text-sm text-gray-700 dark:text-gray-300">
-                {machine.config.restart.policy}
-              </p>
-            </div>
-          </div>
-        </div>
         
         {machine.config.env && Object.keys(machine.config.env).length > 0 && (
           <div className="mt-0">
