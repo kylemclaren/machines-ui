@@ -11,7 +11,7 @@ import { TimeAgo } from "@/components/ui/time-ago";
 import toast from 'react-hot-toast';
 import { ConfirmationDialog } from '@/components/ui/confirmation-dialog';
 import { getRegionFlag, formatMemory, capitalizeMachineState } from '@/lib/utils';
-import { Play, Square, RotateCw, Trash2, Menu, PauseCircle } from 'lucide-react';
+import { Play, Square, RotateCw, Trash2, Menu, PauseCircle, Terminal } from 'lucide-react';
 import { CopyableCode } from '@/components/ui/copyable-code';
 import { CopyableJson } from '@/components/ui/copyable-json';
 import {
@@ -28,6 +28,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { TerminalDialog } from '@/components/ui/terminal-dialog';
 
 export default function MachineDetailsPage() {
   const params = useParams();
@@ -39,6 +40,7 @@ export default function MachineDetailsPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [confirmationOpen, setConfirmationOpen] = useState(false);
   const [confirmAction, setConfirmAction] = useState<'start' | 'stop' | 'restart' | 'delete' | 'suspend' | null>(null);
+  const [terminalOpen, setTerminalOpen] = useState(false);
 
   // Get machine details
   const { data: machine, isLoading: isMachineLoading, error } = useQuery(
@@ -75,6 +77,14 @@ export default function MachineDetailsPage() {
 
   const closeConfirmation = () => {
     setConfirmationOpen(false);
+  };
+
+  const openTerminal = () => {
+    setTerminalOpen(true);
+  };
+
+  const closeTerminal = () => {
+    setTerminalOpen(false);
   };
 
   const getConfirmationMessage = () => {
@@ -287,6 +297,16 @@ export default function MachineDetailsPage() {
                 Suspend
               </button>
             )}
+            {machine.state === 'started' && (
+              <button
+                onClick={openTerminal}
+                disabled={isLoading}
+                className="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 disabled:opacity-50 flex items-center cursor-pointer"
+              >
+                <Terminal size={18} className="mr-2" />
+                Run
+              </button>
+            )}
             <button
               onClick={() => openConfirmation('delete')}
               disabled={isLoading}
@@ -343,6 +363,16 @@ export default function MachineDetailsPage() {
                   >
                     <PauseCircle size={16} className="mr-2" />
                     Suspend
+                  </DropdownMenuItem>
+                )}
+                {machine.state === 'started' && (
+                  <DropdownMenuItem 
+                    onClick={openTerminal}
+                    disabled={isLoading}
+                    className="cursor-pointer"
+                  >
+                    <Terminal size={16} className="mr-2" />
+                    Run
                   </DropdownMenuItem>
                 )}
                 <DropdownMenuItem 
@@ -528,6 +558,14 @@ export default function MachineDetailsPage() {
         description={getConfirmationMessage().description}
         confirmText={confirmAction === 'delete' ? 'Delete' : 'Confirm'}
         destructive={confirmAction === 'delete'}
+      />
+
+      {/* Terminal Dialog */}
+      <TerminalDialog
+        isOpen={terminalOpen}
+        onClose={closeTerminal}
+        appName={appName}
+        machineId={machineId}
       />
     </div>
   );
