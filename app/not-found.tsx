@@ -25,8 +25,12 @@ export default function NotFound() {
           />
         </div>
         
-        <h1 className="text-4xl md:text-6xl font-bold text-foreground mb-4 tracking-tight">
-          <span className="text-purple-600 dark:text-purple-400">404</span> - Page Not Found
+        <div className="inline-block px-3 py-1 text-xs font-medium rounded-full bg-purple-100 text-purple-800 dark:bg-purple-900/50 dark:text-purple-300 border border-purple-200 dark:border-purple-800 mb-3">
+          404 Error
+        </div>
+        
+        <h1 className="text-3xl md:text-5xl font-semibold text-foreground/90 mb-4 tracking-tight">
+          Well this is awkward...
         </h1>
         
         <p className="text-lg md:text-xl text-muted-foreground mb-10 max-w-2xl mx-auto">
