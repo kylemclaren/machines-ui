@@ -11,7 +11,7 @@ import { TimeAgo } from "@/components/ui/time-ago";
 import toast from 'react-hot-toast';
 import { ConfirmationDialog } from '@/components/ui/confirmation-dialog';
 import { getRegionFlag, formatMemory, capitalizeMachineState } from '@/lib/utils';
-import { Play, Square, RotateCw, ExternalLink, PauseCircle } from 'lucide-react';
+import { Play, Square, RotateCw, ExternalLink, PauseCircle, StopCircle, Trash, Server, Plus, MoreHorizontal } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -36,6 +36,7 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { MachineCreateForm, MachineFormValues } from "@/components/ui/machine-create-form";
+import { Badge } from '@/components/ui/badge';
 
 export default function AppMachinesPage() {
   const params = useParams();
@@ -513,11 +514,15 @@ interface MachineRowProps {
 }
 
 function MachineRow({ machine, appName, onAction }: MachineRowProps) {
-  const stateColors: Record<string, string> = {
-    started: 'bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100',
-    stopped: 'bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-100',
-    created: 'bg-blue-100 text-blue-800 dark:bg-blue-800 dark:text-blue-100',
-    suspended: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-800 dark:text-yellow-100',
+  // Get custom class for machine state badge
+  const getStateClass = (state: string): string => {
+    const stateClasses: Record<string, string> = {
+      started: 'bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100 border-green-200 dark:border-green-700',
+      stopped: 'bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-100 border-red-200 dark:border-red-700',
+      created: 'bg-blue-100 text-blue-800 dark:bg-blue-800 dark:text-blue-100 border-blue-200 dark:border-blue-700',
+      suspended: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-800 dark:text-yellow-100 border-yellow-200 dark:border-yellow-700',
+    };
+    return stateClasses[state] || 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-600';
   };
 
   return (
@@ -540,9 +545,9 @@ function MachineRow({ machine, appName, onAction }: MachineRowProps) {
         </div>
       </td>
       <td className="px-6 py-4 whitespace-nowrap">
-        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${stateColors[machine.state] || 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'}`}>
+        <Badge className={`rounded-full ${getStateClass(machine.state)}`}>
           {capitalizeMachineState(machine.state)}
-        </span>
+        </Badge>
       </td>
       <td className="px-6 py-4 whitespace-nowrap">
         <div className="text-sm text-gray-500 dark:text-gray-400">

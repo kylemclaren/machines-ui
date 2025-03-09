@@ -29,6 +29,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { TerminalDialog } from '@/components/ui/terminal-dialog';
+import { Badge } from '@/components/ui/badge';
 
 export default function MachineDetailsPage() {
   const params = useParams();
@@ -196,6 +197,28 @@ export default function MachineDetailsPage() {
     return stateColors[state] || 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300';
   };
 
+  // Get the variant for machine state badge
+  const getStateVariant = (state: string): "default" | "destructive" | "outline" | "secondary" | null => {
+    const stateVariants: Record<string, "default" | "destructive" | "outline" | "secondary"> = {
+      started: 'default', // Green
+      stopped: 'destructive', // Red
+      created: 'secondary', // Gray
+      suspended: 'outline', // Yellow/outline
+    };
+    return stateVariants[state] || 'secondary';
+  };
+  
+  // Get custom class for machine state badge
+  const getStateClass = (state: string): string => {
+    const stateClasses: Record<string, string> = {
+      started: 'bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100 border-green-200 dark:border-green-700',
+      stopped: 'bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-100 border-red-200 dark:border-red-700',
+      created: 'bg-blue-100 text-blue-800 dark:bg-blue-800 dark:text-blue-100 border-blue-200 dark:border-blue-700',
+      suspended: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-800 dark:text-yellow-100 border-yellow-200 dark:border-yellow-700',
+    };
+    return stateClasses[state] || 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-600';
+  };
+
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
@@ -241,9 +264,11 @@ export default function MachineDetailsPage() {
             <span className="ml-2 text-2xl" title={machine.region || 'Unknown region'}>
               {getRegionFlag(machine.region)}
             </span>
-            <span className={`ml-3 px-2 py-0.5 text-xs font-medium rounded-full ${getStateColor(machine.state)}`}>
+            <Badge 
+              className={`ml-3 rounded-full ${getStateClass(machine.state)}`}
+            >
               {capitalizeMachineState(machine.state)}
-            </span>
+            </Badge>
           </div>
           <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
             Machine details and configuration
@@ -588,9 +613,9 @@ function EventRow({ event }: EventRowProps) {
         <TimeAgo date={event.timestamp} />
       </td>
       <td className="px-6 py-4 whitespace-nowrap">
-        <span className="px-2 py-1 text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-full">
+        <Badge variant="secondary" className="rounded-full">
           {event.type}
-        </span>
+        </Badge>
       </td>
       <td className="px-6 py-4 whitespace-nowrap">
         <span className={`text-sm font-medium ${statusColors[event.status] || 'text-gray-600 dark:text-gray-400'}`}>

@@ -18,6 +18,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { Badge } from '@/components/ui/badge';
 
 export default function AppDetailsPage() {
   const params = useParams();
@@ -77,7 +78,7 @@ export default function AppDetailsPage() {
     }
   );
 
-  // Add a function to get appropriate color for the status
+  // Get appropriate color for the status
   const getStatusColor = (status: string) => {
     const statusColors: Record<string, string> = {
       deployed: 'bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100',
@@ -87,6 +88,18 @@ export default function AppDetailsPage() {
       suspended: 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300',
     };
     return statusColors[status.toLowerCase()] || 'bg-blue-100 text-blue-800 dark:bg-blue-800 dark:text-blue-100';
+  };
+
+  // Get custom class for status badge
+  const getStatusClass = (status: string): string => {
+    const statusClasses: Record<string, string> = {
+      deployed: 'bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100 border-green-200 dark:border-green-700',
+      running: 'bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100 border-green-200 dark:border-green-700',
+      pending: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-800 dark:text-yellow-100 border-yellow-200 dark:border-yellow-700',
+      failed: 'bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-100 border-red-200 dark:border-red-700',
+      suspended: 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-600',
+    };
+    return statusClasses[status.toLowerCase()] || 'bg-blue-100 text-blue-800 dark:bg-blue-800 dark:text-blue-100 border-blue-200 dark:border-blue-700';
   };
 
   const openDeleteConfirm = () => {
@@ -205,9 +218,9 @@ export default function AppDetailsPage() {
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
           <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-2">Status</h2>
           <div className="flex items-center">
-            <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(app.status || 'unknown')} mr-2`}>
+            <Badge className={`rounded-full ${getStatusClass(app.status || 'unknown')} mr-2`}>
               {app.status || 'unknown'}
-            </span>
+            </Badge>
           </div>
         </div>
 
