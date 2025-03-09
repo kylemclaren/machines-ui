@@ -11,9 +11,9 @@ interface CopyableCodeProps {
 
 export function CopyableCode({ value, children, className = '' }: CopyableCodeProps) {
   return (
-    <span className="inline-flex items-center">
-      <code className={className}>{children}</code>
-      <CopyButton value={value} />
+    <span className="inline-flex items-start gap-1 max-w-full">
+      <code className={`overflow-hidden text-ellipsis ${className}`}>{children}</code>
+      <CopyButton value={value} className="flex-shrink-0 mt-0.5" />
     </span>
   );
 } 
