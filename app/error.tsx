@@ -73,6 +73,19 @@ export default function Error({
           </Link>
         </div>
       </div>
+      
+      {/* Artwork credit at the bottom of the page */}
+      <div className="absolute bottom-0 left-0 right-0 w-full text-center py-4 text-xs text-muted-foreground/60 z-20">
+        Artwork by{" "}
+        <a 
+          href="https://annieruygtillustration.com/" 
+          target="_blank" 
+          rel="noopener noreferrer" 
+          className="text-purple-600 dark:text-purple-400 hover:underline focus-visible:underline focus:outline-none"
+        >
+          Annie Ruygt
+        </a>
+      </div>
     </div>
   );
 } 
