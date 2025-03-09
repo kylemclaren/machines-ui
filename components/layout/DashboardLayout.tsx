@@ -3,8 +3,9 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useApi } from '../../lib/api-context';
 import ThemeToggle from './ThemeToggle';
-import { ExternalLink, Menu, X, Book } from 'lucide-react';
+import { ExternalLink, Menu, X, Book, Search } from 'lucide-react';
 import StatusIndicator from '@/components/ui/status-indicator';
+import { CommandMenu } from './CommandMenu';
 
 interface NavItem {
   href: string;
@@ -159,8 +160,28 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               })}
             </div>
             
+            {/* Border separator between navigation and search */}
+            <div className="mt-6 pt-2 border-t border-gray-200 dark:border-gray-700"></div>
+            
+            {/* Search button with border */}
+            <div className="mt-3 px-2">
+              <button
+                className="flex items-center w-full px-3 py-2 text-sm text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-800 rounded-md border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                onClick={() => {
+                  document.dispatchEvent(new KeyboardEvent('keydown', {
+                    key: 'k',
+                    metaKey: true
+                  }));
+                }}
+              >
+                <Search size={16} className="mr-2 text-gray-500 dark:text-gray-400" />
+                <span>Search</span>
+                <kbd className="ml-auto px-2 py-0.5 bg-gray-200 dark:bg-gray-700 rounded text-gray-500 dark:text-gray-400 text-xs">⌘K</kbd>
+              </button>
+            </div>
+            
             {/* Use the full theme toggle component */}
-            <div className="mt-6 pt-3 border-t border-gray-200 dark:border-gray-700">
+            <div className="mt-4 pt-3 border-t border-gray-200 dark:border-gray-700">
               <ThemeToggle />
             </div>
             
@@ -235,6 +256,11 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                 />
               </Link>
             </div>
+
+            {/* Mobile header with hamburger menu */}
+            <div className="flex items-center space-x-2">
+              <ThemeToggle />
+            </div>
           </div>
         </header>
 
@@ -243,6 +269,9 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             {children}
           </div>
         </main>
+        
+        {/* Add the CommandMenu component */}
+        <CommandMenu />
       </div>
     </div>
   );
