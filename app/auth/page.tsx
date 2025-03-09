@@ -3,13 +3,19 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import flyApi from '../../lib/api-client';
-import { Github } from 'lucide-react';
+import { Github, Info } from 'lucide-react';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 
 export default function LoginPage() {
   const [token, setToken] = useState('');
   const [orgSlug, setOrgSlug] = useState('personal');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [tokenValid, setTokenValid] = useState<boolean | null>(null);
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -23,10 +29,10 @@ export default function LoginPage() {
       return;
     }
 
-    // Check if token follows expected pattern
-    if (!trimmedToken.startsWith('FlyV1')) {
-      setError('Warning: Fly.io API tokens typically start with "FlyV1". Your token may not be valid.');
-      // Continue anyway as this is just a warning
+    // Check if token follows one of the expected patterns
+    if (!trimmedToken.startsWith('FlyV1') && !trimmedToken.startsWith('fm2_')) {
+      setError('Invalid token format. Token should start with either "FlyV1" or "fm2_".');
+      return; // Don't continue with invalid token
     }
 
     try {
@@ -48,6 +54,20 @@ export default function LoginPage() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  // Validate token as user types
+  const handleTokenChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setToken(value);
+    
+    if (!value.trim()) {
+      setTokenValid(null); // No value, no validation state
+      return;
+    }
+    
+    // Check for valid token format
+    setTokenValid(value.startsWith('FlyV1') || value.startsWith('fm2_'));
   };
 
   return (
@@ -88,11 +108,22 @@ export default function LoginPage() {
                 name="token"
                 type="password"
                 required
-                className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-700 px-3 py-2 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 bg-white dark:bg-gray-800 focus:border-blue-500 focus:outline-none focus:ring-blue-500 sm:text-sm"
+                className={`mt-1 block w-full rounded-md border ${
+                  tokenValid === true 
+                    ? 'border-green-500 dark:border-green-700 focus:border-green-500 focus:ring-green-500/20' 
+                    : tokenValid === false 
+                      ? 'border-red-500 dark:border-red-700 focus:border-red-500 focus:ring-red-500/20' 
+                      : 'border-gray-300 dark:border-gray-700 focus:border-blue-500 focus:ring-blue-500'
+                } px-3 py-2 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 bg-white dark:bg-gray-800 focus:outline-none sm:text-sm`}
                 placeholder="Enter your Fly.io API token"
                 value={token}
-                onChange={(e) => setToken(e.target.value)}
+                onChange={handleTokenChange}
               />
+              {tokenValid === false && (
+                <p className="mt-1 text-xs text-red-500 dark:text-red-400">
+                  Token must start with "FlyV1" or "fm2_"
+                </p>
+              )}
               
               <div className="mt-4">
                 <label htmlFor="org-slug" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -108,17 +139,32 @@ export default function LoginPage() {
                   onChange={(e) => setOrgSlug(e.target.value)}
                 />
                 <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                  Leave as &quot;personal&quot; for your personal account
+                  Leave as &quot;personal&quot; for your personal organization
                 </p>
               </div>
               
-              <div className="mt-4 text-xs text-gray-500 dark:text-gray-400">
-                <p>To get your token:</p>
-                <ol className="list-decimal list-inside pl-2 space-y-1 mt-1">
-                  <li>Download the <a href="https://fly.io/docs/flyctl/install/" target="_blank" className="text-blue-600 dark:text-blue-400 hover:underline">Fly CLI</a></li>
-                  <li>Run <code className="bg-gray-100 dark:bg-gray-700 px-1 py-0.5 rounded">fly tokens create org</code> to create a new token</li> 
-                  <li>Copy and paste the generated token that begins with <code className="bg-gray-100 dark:bg-gray-700 px-1 py-0.5 rounded">FlyV1</code></li>
-                </ol>
+              <div className="mt-4 flex items-center">
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <button 
+                      type="button" 
+                      className="inline-flex items-center text-xs text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
+                    >
+                      <Info className="h-4 w-4 mr-1" />
+                      How to get your token
+                    </button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-80 p-4 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+                    <div className="text-gray-700 dark:text-gray-300">
+                      <h3 className="text-sm font-medium mb-2">To get your token:</h3>
+                      <ol className="text-xs list-decimal list-inside pl-2 space-y-2">
+                        <li>Download the <a href="https://fly.io/docs/flyctl/install/" target="_blank" className="text-blue-600 dark:text-blue-400 hover:underline">Fly CLI</a></li>
+                        <li>Run <code className="bg-gray-100 dark:bg-gray-700 px-1 py-0.5 rounded">fly tokens create org</code> to create a new token</li> 
+                        <li>Copy and paste the generated token that begins with either <code className="bg-gray-100 dark:bg-gray-700 px-1 py-0.5 rounded">FlyV1</code> or <code className="bg-gray-100 dark:bg-gray-700 px-1 py-0.5 rounded">fm2_</code></li>
+                      </ol>
+                    </div>
+                  </PopoverContent>
+                </Popover>
               </div>
             </div>
           </div>
@@ -126,8 +172,12 @@ export default function LoginPage() {
           <div>
             <button
               type="submit"
-              disabled={isLoading}
-              className={`group relative flex w-full justify-center rounded-md border border-transparent bg-blue-600 py-2 px-4 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900 ${isLoading ? 'opacity-70 cursor-not-allowed' : ''}`}
+              disabled={isLoading || tokenValid !== true}
+              className={`group relative flex w-full justify-center rounded-md border border-transparent bg-blue-600 py-2 px-4 text-sm font-medium text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900 ${
+                (isLoading || tokenValid !== true) 
+                  ? 'opacity-70 cursor-not-allowed' 
+                  : 'cursor-pointer hover:bg-blue-700'
+              }`}
             >
               {isLoading ? 'Authenticating...' : 'Authenticate'}
             </button>
