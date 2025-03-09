@@ -30,7 +30,7 @@ export default function NotFound() {
         </h1>
         
         <p className="text-lg md:text-xl text-muted-foreground mb-10 max-w-2xl mx-auto">
-          Looks like our Frankie can't find the page you're looking for. 
+          Looks like Frankie can't find the page you're looking for. 
           It might have floated away or never existed in the first place.
         </p>
         
