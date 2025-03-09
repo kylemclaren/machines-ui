@@ -31,7 +31,7 @@ export default function DashboardPage() {
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
           <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-2">Apps</h2>
           <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
-            Manage your Fly.io applications
+            Manage your Fly.io Applications
           </p>
           <Link
             href="/dashboard/apps"

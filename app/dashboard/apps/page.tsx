@@ -228,14 +228,14 @@ export default function AppsPage() {
         onOpenChange={setCreateAppOpen}
         onSubmit={handleSubmitApp}
         isLoading={isCreatingApp}
-        organizations={[{ slug: orgSlug, name: orgSlug }]} // In a real app, you'd have a list of orgs
+        organizations={[{ slug: orgSlug, name: orgSlug }]}
       />
 
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Applications</h1>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Apps</h1>
           <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-            Manage your Fly.io applications
+            Manage your Fly.io Apps
           </p>
         </div>
         <button
