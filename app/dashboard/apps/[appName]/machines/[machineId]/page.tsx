@@ -92,16 +92,16 @@ export default function MachineDetailsPage() {
     if (!confirmAction) return { title: '', description: '' };
     
     const actionMap = {
-      start: { title: 'Start Machine?', description: 'Are you sure you want to start this machine?' },
-      stop: { title: 'Stop Machine?', description: 'Are you sure you want to stop this machine?' },
-      restart: { title: 'Restart Machine?', description: 'Are you sure you want to restart this machine?' },
+      start: { title: 'Start Machine?', description: 'Are you sure you want to start this Machine?' },
+      stop: { title: 'Stop Machine?', description: 'Are you sure you want to stop this Machine?' },
+      restart: { title: 'Restart Machine?', description: 'Are you sure you want to restart this Machine?' },
       delete: { 
         title: 'Delete Machine?', 
-        description: 'This action cannot be undone. This will permanently delete this machine and all associated data.' 
+        description: 'This action cannot be undone. This will permanently delete this Machine and all associated data.' 
       },
       suspend: {
         title: 'Suspend Machine?',
-        description: 'This will pause the machine and preserve its memory state. You can resume it later.'
+        description: 'This will pause the Machine and preserve its memory state. You can resume it later.'
       }
     };
     
@@ -542,7 +542,7 @@ export default function MachineDetailsPage() {
         </h2>
         
         {events.length === 0 ? (
-          <p className="text-gray-500 dark:text-gray-400 text-center py-6">No events found for this machine</p>
+          <p className="text-gray-500 dark:text-gray-400 text-center py-6">No events found for this Machine</p>
         ) : (
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">

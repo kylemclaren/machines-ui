@@ -81,7 +81,7 @@ export function AppCreateForm({
         <DialogHeader>
           <DialogTitle className="text-xl font-semibold text-gray-900 dark:text-white">Create New App</DialogTitle>
           <DialogDescription className="text-gray-500 dark:text-gray-400">
-            Configure a new Fly.io application. Apps are containers for machines and other resources.
+            Configure a new Fly.io application. Apps are containers for Machines and other resources.
           </DialogDescription>
         </DialogHeader>
 

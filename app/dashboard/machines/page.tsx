@@ -229,7 +229,7 @@ export default function MachinesPage() {
             </div>
           ) : (
             <p className="text-gray-500 dark:text-gray-400 text-center py-4">
-              No machines found for this app.
+              No Machines found for this app.
             </p>
           )}
         </div>

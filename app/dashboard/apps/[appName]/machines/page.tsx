@@ -421,7 +421,7 @@ export default function AppMachinesPage() {
                   id="search-machines"
                   type="text"
                   className="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md leading-5 bg-white dark:bg-gray-700 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:text-white"
-                  placeholder="Search machines..."
+                  placeholder="Search Machines..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
@@ -477,7 +477,7 @@ export default function AppMachinesPage() {
                   <td colSpan={5} className="px-6 py-4 text-center text-gray-500 dark:text-gray-400">
                     <div className="flex justify-center items-center space-x-2">
                       <div className="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-                      <span>Loading machines...</span>
+                      <span>Loading Machines...</span>
                     </div>
                   </td>
                 </tr>
@@ -494,8 +494,8 @@ export default function AppMachinesPage() {
                 <tr>
                   <td colSpan={5} className="px-6 py-4 text-center text-gray-500 dark:text-gray-400">
                     {searchTerm || filterState
-                      ? 'No machines found matching your filters'
-                      : 'No machines found for this app'}
+                      ? 'No Machines found matching your filters'
+                      : 'No Machines found for this app'}
                   </td>
                 </tr>
               )}

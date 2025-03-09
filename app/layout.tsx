@@ -17,7 +17,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Fly.io Machines Dashboard",
-  description: "A dashboard for managing Fly.io applications, machines, and volumes",
+  description: "A dashboard for managing Fly.io Apps, Machines, and Volumes",
 };
 
 export default function RootLayout({
