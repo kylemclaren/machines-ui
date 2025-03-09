@@ -50,7 +50,7 @@ export default function DashboardPage() {
             href="/dashboard/machines"
             className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 text-sm font-medium"
           >
-            View all machines &rarr;
+            View all Machines &rarr;
           </Link>
         </div>
 

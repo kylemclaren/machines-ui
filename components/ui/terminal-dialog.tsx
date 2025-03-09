@@ -243,7 +243,7 @@ export function TerminalDialog({ isOpen, onClose, appName, machineId }: Terminal
               <ul className="space-y-1.5 text-gray-700 dark:text-gray-300">
                 <li className="flex items-start">
                   <span className="text-amber-500 mr-2">•</span>
-                  If you see <span className="font-mono bg-gray-100 dark:bg-gray-700 px-1 rounded">command not found</span>, the command may not be installed on the machine
+                  If you see <span className="font-mono bg-gray-100 dark:bg-gray-700 px-1 rounded">command not found</span>, the command may not be installed on the Machine
                 </li>
                 <li className="flex items-start">
                   <span className="text-amber-500 mr-2">•</span>

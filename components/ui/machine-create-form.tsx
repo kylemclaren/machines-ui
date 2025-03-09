@@ -195,7 +195,7 @@ export function MachineCreateForm({
         <DialogHeader>
           <DialogTitle className="text-xl font-semibold text-gray-900 dark:text-white">Create New Machine</DialogTitle>
           <DialogDescription className="text-gray-500 dark:text-gray-400">
-            Configure a new machine for your application. Fill in the basic information below.
+            Configure a new Machine for your application. Fill in the basic information below.
           </DialogDescription>
         </DialogHeader>
 
@@ -222,7 +222,7 @@ export function MachineCreateForm({
                         />
                       </FormControl>
                       <FormDescription className="text-gray-500 dark:text-gray-400">
-                        A unique name for your machine. If left empty, one will be generated for you.
+                        A unique name for your Machine. If left empty, one will be generated for you.
                       </FormDescription>
                       <FormMessage className="text-red-500" />
                     </FormItem>
@@ -250,7 +250,7 @@ export function MachineCreateForm({
                         </SelectContent>
                       </Select>
                       <FormDescription className="text-gray-500 dark:text-gray-400">
-                        Choose the geographical region where your machine will be deployed.
+                        Choose the geographical region where your Machine will be deployed.
                       </FormDescription>
                       <FormMessage className="text-red-500" />
                     </FormItem>
@@ -281,7 +281,7 @@ export function MachineCreateForm({
                         </SelectContent>
                       </Select>
                       <FormDescription className="text-gray-500 dark:text-gray-400">
-                        Choose the computational resources for your machine.
+                        Choose the computational resources for your Machine.
                       </FormDescription>
                       <FormMessage className="text-red-500" />
                     </FormItem>
@@ -302,7 +302,7 @@ export function MachineCreateForm({
                         />
                       </FormControl>
                       <FormDescription className="text-gray-500 dark:text-gray-400">
-                        Enter the Docker image to use for this machine.
+                        Enter the Docker image to use for this Machine.
                       </FormDescription>
                       <FormMessage className="text-red-500" />
                     </FormItem>
@@ -395,7 +395,7 @@ export function MachineCreateForm({
                         <div className="space-y-1 leading-none">
                           <FormLabel className="text-gray-700 dark:text-gray-300">Auto Start</FormLabel>
                           <FormDescription className="text-gray-500 dark:text-gray-400">
-                            Start this machine automatically when requests arrive.
+                            Start this Machine automatically when requests arrive.
                           </FormDescription>
                         </div>
                       </FormItem>
@@ -418,7 +418,7 @@ export function MachineCreateForm({
                         <div className="space-y-1 leading-none">
                           <FormLabel className="text-gray-700 dark:text-gray-300">Auto Stop</FormLabel>
                           <FormDescription className="text-gray-500 dark:text-gray-400">
-                            Stop this machine when it becomes idle.
+                            Stop this Machine when it becomes idle.
                           </FormDescription>
                         </div>
                       </FormItem>
