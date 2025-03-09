@@ -127,7 +127,7 @@ export function CommandMenu() {
         
         {/* Apps Group */}
         <CommandGroup heading="Apps">
-          {apps.map((app) => (
+          {[...apps].reverse().map((app) => (
             <CommandItem
               key={app.id}
               value={`/dashboard/apps/${app.name}`}
@@ -143,7 +143,7 @@ export function CommandMenu() {
         
         {/* Machines Group */}
         <CommandGroup heading="Machines">
-          {machines.map((machine) => (
+          {[...machines].reverse().map((machine) => (
             <CommandItem
               key={machine.id}
               value={`/dashboard/apps/${machine.appName}/machines/${machine.id}`}
@@ -162,7 +162,7 @@ export function CommandMenu() {
         
         {/* Volumes Group */}
         <CommandGroup heading="Volumes">
-          {volumes.map((volume) => (
+          {[...volumes].reverse().map((volume) => (
             <CommandItem
               key={volume.id}
               value={`/dashboard/apps/${volume.appName}/volumes/${volume.id}`}
