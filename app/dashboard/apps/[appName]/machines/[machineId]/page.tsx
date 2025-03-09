@@ -451,11 +451,13 @@ export default function MachineDetailsPage() {
                 <TimeAgo date={machine.updated_at} />
               </p>
             </div>
-            <div>
+            <div className="overflow-hidden">
               <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Image</p>
-              <p className="mt-1 text-sm text-gray-900 dark:text-white font-mono flex items-center">
-                <CopyableCode value={machine.config.image}>{machine.config.image}</CopyableCode>
-              </p>
+              <div className="mt-1 text-sm text-gray-900 dark:text-white font-mono w-full overflow-hidden">
+                <CopyableCode value={machine.config.image} className="break-all w-full">
+                  {machine.config.image}
+                </CopyableCode>
+              </div>
             </div>
           </div>
         </div>
