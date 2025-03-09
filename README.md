@@ -25,17 +25,20 @@ A modern dashboard for managing your Fly.io resources through the Machines API. 
 ## Getting Started
 
 1. Clone the repository
+
    ```bash
    git clone https://github.com/kylemclaren/machines-ui.git
    cd machines-ui
    ```
 
 2. Install dependencies
+
    ```bash
    bun install
    ```
 
 3. Run the development server
+
    ```bash
    bun run dev
    ```
@@ -49,6 +52,14 @@ To use the dashboard, you'll need to authenticate with your Fly.io API token:
 1. Download the [Fly CLI]((https://fly.io/docs/flyctl/install/))
 2. Generate an API token with `fly tokens create org to create a new token`
 3. Enter your token in the login screen of the dashboard
+
+## Deploy to Fly.io
+
+To deploy the app tp Fly.io, simply run:
+
+   ```bash
+   fly launch --from https://github.com/kylemclaren/machines-ui.git
+   ```
 
 ## API Documentation
 
