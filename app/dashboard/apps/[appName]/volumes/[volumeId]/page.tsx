@@ -1,12 +1,15 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useQuery } from 'react-query';
 import { useApi } from '../../../../../../lib/api-context';
 import flyApi from '../../../../../../lib/api-client';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
-import { Volume } from '../../../../../../types/api';
+import { 
+  Volume as BaseVolume,
+  // Include other imports...
+} from '../../../../../../types/api';
 import { TimeAgo } from "@/components/ui/time-ago";
 import { CopyableCode } from '@/components/ui/copyable-code';
 import {
@@ -17,7 +20,37 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Check, Code, FileHeart, X } from 'lucide-react';
+import { Progress } from "@/components/ui/progress";
+import { getRegionFlag } from '@/lib/utils';
+import { Badge } from "@/components/ui/badge";
+
+// Helper function to format storage sizes
+const formatStorageSize = (bytes: number): string => {
+  if (bytes === 0) return '0 Bytes';
+  
+  const units = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(1024));
+  
+  // If we're close to the next unit up, round up to avoid showing 1023.9 MB
+  if (bytes / Math.pow(1024, i) > 1000 && i < units.length - 1) {
+    return `1 ${units[i+1]}`;
+  }
+  
+  return `${(bytes / Math.pow(1024, i)).toFixed(2).replace(/\.00$/, '')} ${units[i]}`;
+};
+
+// Extended Volume interface with additional properties from API schema, excluding legacy fields
+interface ExtendedVolume extends BaseVolume {
+  auto_backup_enabled?: boolean;
+  block_size?: number;
+  blocks?: number;
+  blocks_avail?: number;
+  blocks_free?: number;
+  fstype?: string;
+  host_status?: 'ok' | 'unknown' | 'unreachable';
+  state?: string;
+}
 
 export default function VolumeDetailsPage() {
   const params = useParams();
@@ -25,6 +58,9 @@ export default function VolumeDetailsPage() {
   const volumeId = params.volumeId as string;
   const { isAuthenticated } = useApi();
   const router = useRouter();
+  
+  // State to toggle between human-readable and raw block display
+  const [showBlocks, setShowBlocks] = useState(false);
 
   // Get volume details
   const { data: volume, isLoading: isVolumeLoading, error } = useQuery(
@@ -34,7 +70,7 @@ export default function VolumeDetailsPage() {
       enabled: isAuthenticated && !!appName && !!volumeId,
       refetchOnWindowFocus: false,
     }
-  );
+  ) as { data: ExtendedVolume | null, isLoading: boolean, error: any };
 
   if (isVolumeLoading) {
     return (
@@ -163,9 +199,13 @@ export default function VolumeDetailsPage() {
             <div>
               <h1 className="text-xl font-semibold text-gray-900 dark:text-white flex items-center">
                 {volume.name}
-                <span className={`ml-3 px-2.5 py-0.5 text-xs rounded-full ${isAttached ? 'bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100' : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-800 dark:text-yellow-100'}`}>
+                <Badge 
+                  className={`ml-3 rounded-full ${isAttached ? 
+                    'bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100 border-green-200 dark:border-green-700' : 
+                    'bg-yellow-100 text-yellow-800 dark:bg-yellow-800 dark:text-yellow-100 border-yellow-200 dark:border-yellow-700'}`}
+                >
                   {isAttached ? 'Attached' : 'Detached'}
-                </span>
+                </Badge>
               </h1>
               <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
                 Volume details and configuration
@@ -196,6 +236,17 @@ export default function VolumeDetailsPage() {
                   <p className="mt-1 text-sm text-gray-900 dark:text-white">{volume.size_gb} GB</p>
                 </div>
                 <div>
+                  <p className="text-sm font-medium text-gray-500 dark:text-gray-400">State</p>
+                  <p className="mt-1 text-sm text-gray-900 dark:text-white">
+                    <Badge className={`rounded-full ${volume.state === 'available' ? 
+                      'bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100 border-green-200 dark:border-green-700' : 
+                      'bg-blue-100 text-blue-800 dark:bg-blue-800 dark:text-blue-100 border-blue-200 dark:border-blue-700'}`}
+                    >
+                      {volume.state || 'Unknown'}
+                    </Badge>
+                  </p>
+                </div>
+                <div>
                   <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Created</p>
                   <p className="mt-1 text-sm text-gray-900 dark:text-white">
                     <TimeAgo date={volume.created_at} />
@@ -211,16 +262,61 @@ export default function VolumeDetailsPage() {
               <div className="space-y-4">
                 <div>
                   <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Region</p>
-                  <p className="mt-1 text-sm text-gray-900 dark:text-white">{volume.region}</p>
+                  <p className="mt-1 text-sm text-gray-900 dark:text-white flex items-center">
+                    <span className="mr-2 text-lg" title={volume.region || 'Unknown region'}>
+                      {getRegionFlag(volume.region)}
+                    </span>
+                    {volume.region || 'Unknown'}
+                  </p>
                 </div>
                 <div>
                   <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Zone</p>
-                  <p className="mt-1 text-sm text-gray-900 dark:text-white">{volume.zone}</p>
+                  <p className="mt-1 text-sm text-gray-900 dark:text-white flex items-center">
+                    {volume.zone || 'Unknown'}
+                    {volume.host_status && (
+                      <Badge className={`ml-2 rounded-full 
+                        ${volume.host_status === 'ok' 
+                          ? 'bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100 border-green-200 dark:border-green-700' 
+                          : volume.host_status === 'unknown'
+                            ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-800 dark:text-yellow-100 border-yellow-200 dark:border-yellow-700'
+                            : 'bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-100 border-red-200 dark:border-red-700'
+                        }`}
+                      >
+                        {volume.host_status}
+                      </Badge>
+                    )}
+                  </p>
                 </div>
                 <div>
                   <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Encryption</p>
-                  <p className="mt-1 text-sm text-gray-900 dark:text-white">
-                    {volume.encrypted ? 'Enabled' : 'Disabled'}
+                  <p className="mt-1 text-sm text-gray-900 dark:text-white flex items-center">
+                    {volume.encrypted ? (
+                      <>
+                        <Check size={16} className="mr-1.5 text-green-600 dark:text-green-500" />
+                        Enabled
+                      </>
+                    ) : (
+                      <>
+                        <X size={16} className="mr-1.5 text-red-600 dark:text-red-500" />
+                        Disabled
+                      </>
+                    )}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Auto Backup</p>
+                  <p className="mt-1 text-sm text-gray-900 dark:text-white flex items-center">
+                    {volume.auto_backup_enabled === true ? (
+                      <>
+                        <Check size={16} className="mr-1.5 text-green-600 dark:text-green-500" />
+                        Enabled
+                      </>
+                    ) : (
+                      <>
+                        <X size={16} className="mr-1.5 text-red-600 dark:text-red-500" />
+                        Disabled
+                      </>
+                    )}
                   </p>
                 </div>
                 <div>
@@ -233,6 +329,135 @@ export default function VolumeDetailsPage() {
             </div>
           </div>
 
+          {/* Add new Storage Details section with human-readable values */}
+          {(volume.block_size !== undefined || volume.blocks !== undefined || volume.blocks_free !== undefined) && (
+            <div className="mx-6 mb-6 p-6 bg-white dark:bg-gray-800">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-lg font-medium text-gray-900 dark:text-white">
+                  Storage Details
+                </h2>
+                <Badge
+                  className="text-sm px-4 py-1.5 cursor-pointer bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 border-transparent"
+                  onClick={() => setShowBlocks(!showBlocks)}
+                  title={showBlocks ? "Show human-readable format" : "Show technical block details"}
+                >
+                  {showBlocks ? (
+                    <>
+                      <FileHeart size={16} />
+                      Friendly Format
+                    </>
+                  ) : (
+                    <>
+                      <Code size={16} />
+                      Show Blocks
+                    </>
+                  )}
+                </Badge>
+              </div>
+              
+              <div className="space-y-4">
+                {/* Human-readable view */}
+                {!showBlocks ? (
+                  <>
+                    {/* Calculate total storage size from blocks and block_size */}
+                    <div>
+                      <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Total Storage</p>
+                      <p className="mt-1 text-sm text-gray-900 dark:text-white">
+                        {volume.blocks !== undefined && volume.block_size !== undefined 
+                          ? formatStorageSize(volume.blocks * volume.block_size)
+                          : `${volume.size_gb} GB`
+                        }
+                      </p>
+                    </div>
+
+                    {/* Calculate used storage */}
+                    {volume.blocks !== undefined && volume.blocks_free !== undefined && volume.block_size !== undefined && (
+                      <div>
+                        <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Used Storage</p>
+                        <p className="mt-1 text-sm text-gray-900 dark:text-white">
+                          {formatStorageSize((volume.blocks - volume.blocks_free) * volume.block_size)}
+                        </p>
+                      </div>
+                    )}
+
+                    {/* Calculate free storage */}
+                    {volume.blocks_free !== undefined && volume.block_size !== undefined && (
+                      <div>
+                        <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Free Space</p>
+                        <p className="mt-1 text-sm text-gray-900 dark:text-white">
+                          {formatStorageSize(volume.blocks_free * volume.block_size)}
+                        </p>
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <>
+                    {/* Technical block view */}
+                    {volume.block_size !== undefined && (
+                      <div>
+                        <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Block Size</p>
+                        <p className="mt-1 text-sm text-gray-900 dark:text-white font-mono">
+                          {volume.block_size.toLocaleString()} bytes
+                        </p>
+                      </div>
+                    )}
+                    {volume.blocks !== undefined && (
+                      <div>
+                        <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Total Blocks</p>
+                        <p className="mt-1 text-sm text-gray-900 dark:text-white font-mono">
+                          {volume.blocks.toLocaleString()}
+                        </p>
+                      </div>
+                    )}
+                    {volume.blocks_avail !== undefined && (
+                      <div>
+                        <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Available Blocks</p>
+                        <p className="mt-1 text-sm text-gray-900 dark:text-white font-mono">
+                          {volume.blocks_avail.toLocaleString()}
+                        </p>
+                      </div>
+                    )}
+                    {volume.blocks_free !== undefined && (
+                      <div>
+                        <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Free Blocks</p>
+                        <p className="mt-1 text-sm text-gray-900 dark:text-white font-mono">
+                          {volume.blocks_free.toLocaleString()}
+                        </p>
+                      </div>
+                    )}
+                  </>
+                )}
+
+                {/* Display disk usage with progress bar (shown in both views) */}
+                {volume.blocks !== undefined && volume.blocks_free !== undefined && (
+                  <div>
+                    <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Disk Usage</p>
+                    <div className="mt-2 space-y-1">
+                      <Progress 
+                        value={Math.max(0, Math.min(100, 100 * (1 - volume.blocks_free / volume.blocks)))} 
+                        className="h-2.5 [&>div]:bg-blue-600 dark:[&>div]:bg-blue-600"
+                      />
+                      <p className="text-sm text-gray-900 dark:text-white">
+                        {Math.round(100 * (1 - volume.blocks_free / volume.blocks))}% used
+                        {showBlocks && ` (${(volume.blocks - volume.blocks_free).toLocaleString()} of ${volume.blocks.toLocaleString()} blocks)`}
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Show file system type if available (shown in both views) */}
+                {volume.fstype && (
+                  <div>
+                    <p className="text-sm font-medium text-gray-500 dark:text-gray-400">File System Type</p>
+                    <p className="mt-1 text-sm text-gray-900 dark:text-white">
+                      {volume.fstype.toUpperCase()}
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
           <div className="mx-6 mb-6 p-6 bg-white dark:bg-gray-800">
             <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
               Attachment Status
@@ -241,9 +466,12 @@ export default function VolumeDetailsPage() {
               <div>
                 <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Status</p>
                 <p className="mt-1 text-sm text-gray-900 dark:text-white">
-                  <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${isAttached ? 'bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100' : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-800 dark:text-yellow-100'}`}>
+                  <Badge className={`rounded-full ${isAttached ? 
+                    'bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100 border-green-200 dark:border-green-700' : 
+                    'bg-yellow-100 text-yellow-800 dark:bg-yellow-800 dark:text-yellow-100 border-yellow-200 dark:border-yellow-700'}`}
+                  >
                     {isAttached ? 'Attached' : 'Detached'}
-                  </span>
+                  </Badge>
                 </p>
               </div>
               
@@ -258,19 +486,6 @@ export default function VolumeDetailsPage() {
                       >
                         <CopyableCode value={volume.attached_machine_id || ''}>
                           {volume.attached_machine_id}
-                        </CopyableCode>
-                      </Link>
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Attached to App</p>
-                    <p className="mt-1 text-sm text-gray-900 dark:text-white">
-                      <Link 
-                        href={`/dashboard/apps/${volume.attached_app_id}`}
-                        className="text-blue-600 hover:text-blue-900 flex items-center"
-                      >
-                        <CopyableCode value={volume.attached_app_id || ''}>
-                          {volume.attached_app_id}
                         </CopyableCode>
                       </Link>
                     </p>
