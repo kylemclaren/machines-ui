@@ -1,11 +1,11 @@
 <div align="center">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://github.com/user-attachments/assets/c30c9c6d-0b7e-4d43-b3e1-a293e130d401">
-    <img src="https://github.com/user-attachments/assets/c2c2e2f8-85c7-4e9f-bf0c-05f8873a5f3a"</img>
+    <source media="(prefers-color-scheme: dark)" srcset="https://github.com/user-attachments/assets/4fbf64b5-9ee9-4d6a-97cf-baf54105265b">
+    <img src="https://github.com/user-attachments/assets/dc867946-08a3-41d8-9607-a91956b56350"</img>
   </picture>
 </div>
 
-# Fly.io Machines Dashboard
+# Machines UI
 
 A modern dashboard for managing your Fly.io resources through the Machines API. This dashboard provides a clean interface for monitoring and managing your Fly Apps, Machines, and volumes.
 
