@@ -24,7 +24,7 @@ import { getRegionFlag } from '@/lib/utils';
 export default function AppVolumesPage() {
   const { orgSlug, isAuthenticated } = useApi();
   const params = useParams();
-  const appName = params.appName as string;
+  const appName = params?.appName as string;
   const [searchTerm, setSearchTerm] = useState('');
 
   // Get app details
