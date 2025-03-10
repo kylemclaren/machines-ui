@@ -11,7 +11,7 @@ import { TimeAgo } from "@/components/ui/time-ago";
 import toast from 'react-hot-toast';
 import { ConfirmationDialog } from '@/components/ui/confirmation-dialog';
 import { getRegionFlag, formatMemory, capitalizeMachineState } from '@/lib/utils';
-import { Play, Square, RotateCw, ExternalLink, PauseCircle, StopCircle, Trash, Server, Plus, MoreHorizontal } from 'lucide-react';
+import { Play, Square, RotateCw, ExternalLink, PauseCircle, StopCircle, Trash, Server, Plus, MoreHorizontal, Pause } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -601,7 +601,7 @@ function MachineRow({ machine, appName, onAction }: MachineRowProps) {
                   onClick={() => onAction('action', 'suspend', machine.id)}
                   className="text-purple-600 hover:text-purple-900 dark:text-purple-400 dark:hover:text-purple-300 cursor-pointer"
                 >
-                  <PauseCircle size={18} />
+                  <Pause size={18} />
                   <span className="sr-only">Suspend</span>
                 </button>
               </TooltipTrigger>
