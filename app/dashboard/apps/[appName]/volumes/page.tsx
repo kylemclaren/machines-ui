@@ -18,6 +18,8 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import { Badge } from '@/components/ui/badge';
+import { getRegionFlag } from '@/lib/utils';
 
 export default function AppVolumesPage() {
   const { orgSlug, isAuthenticated } = useApi();
@@ -177,6 +179,12 @@ export default function AppVolumesPage() {
                   scope="col"
                   className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
                 >
+                  Zone
+                </th>
+                <th
+                  scope="col"
+                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
+                >
                   Created
                 </th>
                 <th
@@ -236,19 +244,31 @@ function VolumeRow({ volume, appName }: VolumeRowProps) {
         </Link>
       </td>
       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-        {volume.size_gb} GB
+        {`${volume.size_gb} GB`}
       </td>
       <td className="px-6 py-4 whitespace-nowrap">
-        <div className="text-sm text-gray-500 dark:text-gray-400">{volume.region}</div>
-        <div className="text-xs text-gray-500 dark:text-gray-400">{volume.zone}</div>
+        <div className="flex items-center">
+          <span className="text-xl mr-2" title={volume.region || 'Unknown region'}>
+            {getRegionFlag(volume.region)}
+          </span>
+          <div className="text-sm text-gray-500 dark:text-gray-400">
+            {volume.region}
+          </div>
+        </div>
+      </td>
+      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+        {volume.zone}
       </td>
       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
         <TimeAgo date={volume.created_at} />
       </td>
       <td className="px-6 py-4 whitespace-nowrap">
-        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${isAttached ? 'bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100' : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-800 dark:text-yellow-100'}`}>
+        <Badge className={`rounded-full ${isAttached ? 
+          'bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100 border-green-200 dark:border-green-700' : 
+          'bg-yellow-100 text-yellow-800 dark:bg-yellow-800 dark:text-yellow-100 border-yellow-200 dark:border-yellow-700'}`}
+        >
           {isAttached ? 'Attached' : 'Detached'}
-        </span>
+        </Badge>
         {isAttached && (
           <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
             Machine: {volume.attached_machine_id}
