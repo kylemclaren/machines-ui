@@ -11,7 +11,7 @@ import { TimeAgo } from "@/components/ui/time-ago";
 import toast from 'react-hot-toast';
 import { ConfirmationDialog } from '@/components/ui/confirmation-dialog';
 import { getRegionFlag, formatMemory, capitalizeMachineState } from '@/lib/utils';
-import { Play, Square, RotateCw, Trash2, Menu, PauseCircle, Terminal } from 'lucide-react';
+import { Play, Square, RotateCw, Trash2, Menu, PauseCircle, Terminal, Pause } from 'lucide-react';
 import { CopyableCode } from '@/components/ui/copyable-code';
 import { CopyableJson } from '@/components/ui/copyable-json';
 import {
@@ -318,7 +318,7 @@ export default function MachineDetailsPage() {
                 disabled={isLoading}
                 className="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 disabled:opacity-50 flex items-center cursor-pointer"
               >
-                <PauseCircle size={18} className="mr-2" />
+                <Pause size={18} className="mr-2" />
                 Suspend
               </button>
             )}
@@ -386,7 +386,7 @@ export default function MachineDetailsPage() {
                     disabled={isLoading}
                     className="cursor-pointer"
                   >
-                    <PauseCircle size={16} className="mr-2" />
+                    <Pause size={16} className="mr-2" />
                     Suspend
                   </DropdownMenuItem>
                 )}
