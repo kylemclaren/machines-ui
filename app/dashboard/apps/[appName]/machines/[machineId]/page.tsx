@@ -334,7 +334,7 @@ export default function MachineDetailsPage() {
                 </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-40">
-                {machine.state !== 'started' && (
+                {machine?.state !== 'started' && (
                   <DropdownMenuItem 
                     onClick={() => openConfirmation('start')}
                     disabled={isLoading}
@@ -344,7 +344,7 @@ export default function MachineDetailsPage() {
                     Start
                   </DropdownMenuItem>
                 )}
-                {machine.state === 'started' && (
+                {machine?.state === 'started' && (
                   <DropdownMenuItem 
                     onClick={() => openConfirmation('stop')}
                     disabled={isLoading}
@@ -362,7 +362,7 @@ export default function MachineDetailsPage() {
                   <RotateCw size={16} className="mr-2" />
                   Restart
                 </DropdownMenuItem>
-                {machine.state === 'started' && (
+                {machine?.state === 'started' && (
                   <DropdownMenuItem 
                     onClick={() => openConfirmation('suspend')}
                     disabled={isLoading}
@@ -372,7 +372,7 @@ export default function MachineDetailsPage() {
                     Suspend
                   </DropdownMenuItem>
                 )}
-                {machine.state === 'started' && (
+                {machine?.state === 'started' && (
                   <DropdownMenuItem 
                     onClick={openTerminal}
                     disabled={isLoading}
@@ -433,41 +433,41 @@ export default function MachineDetailsPage() {
                 <div>
                   <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Machine ID</p>
                   <p className="mt-1 text-sm text-gray-900 dark:text-white font-mono">
-                    <CopyableCode value={machine.id}>{machine.id}</CopyableCode>
+                    <CopyableCode value={machine?.id || ''}>{machine?.id}</CopyableCode>
                   </p>
                 </div>
                 <div>
                   <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Region</p>
                   <p className="mt-1 text-sm text-gray-900 dark:text-white flex items-center">
-                    <span className="mr-2 text-lg" title={machine.region || 'Unknown region'}>
-                      {getRegionFlag(machine.region)}
+                    <span className="mr-2 text-lg" title={machine?.region || 'Unknown region'}>
+                      {getRegionFlag(machine?.region)}
                     </span>
-                    {machine.region || 'Unknown'}
+                    {machine?.region || 'Unknown'}
                   </p>
                 </div>
                 <div>
                   <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Private IP</p>
                   <p className="mt-1 text-sm text-gray-900 dark:text-white font-mono">
-                    <CopyableCode value={machine.private_ip}>{machine.private_ip}</CopyableCode>
+                    <CopyableCode value={machine?.private_ip || ''}>{machine?.private_ip}</CopyableCode>
                   </p>
                 </div>
                 <div>
                   <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Created</p>
                   <p className="mt-1 text-sm text-gray-900 dark:text-white">
-                    <TimeAgo date={machine.created_at} />
+                    {machine?.created_at && <TimeAgo date={machine.created_at} />}
                   </p>
                 </div>
                 <div>
                   <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Last Updated</p>
                   <p className="mt-1 text-sm text-gray-900 dark:text-white">
-                    <TimeAgo date={machine.updated_at} />
+                    {machine?.updated_at && <TimeAgo date={machine.updated_at} />}
                   </p>
                 </div>
                 <div className="overflow-hidden">
                   <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Image</p>
                   <div className="mt-1 text-sm text-gray-900 dark:text-white font-mono w-full overflow-hidden">
-                    <CopyableCode value={machine.config.image} className="break-all w-full">
-                      {machine.config.image}
+                    <CopyableCode value={machine?.config?.image || ''} className="break-all w-full">
+                      {machine?.config?.image}
                     </CopyableCode>
                   </div>
                 </div>
@@ -482,22 +482,22 @@ export default function MachineDetailsPage() {
                 <div>
                   <p className="text-sm font-medium text-gray-500 dark:text-gray-400">CPU</p>
                   <p className="mt-1 text-sm text-gray-900 dark:text-white">
-                    {machine.config.guest.cpus} CPUs ({machine.config.guest.cpu_kind})
+                    {machine?.config?.guest?.cpus} CPUs ({machine?.config?.guest?.cpu_kind})
                   </p>
                 </div>
                 <div>
                   <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Memory</p>
                   <p className="mt-1 text-sm text-gray-900 dark:text-white">
-                    {formatMemory(machine.config.guest.memory_mb)}
+                    {machine?.config?.guest?.memory_mb && formatMemory(machine.config.guest.memory_mb)}
                   </p>
                 </div>
                 <div>
                   <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Restart Policy</p>
                   <p className="mt-1 text-sm text-gray-900 dark:text-white">
-                    {machine.config.restart?.policy || 'Unknown'}
+                    {machine?.config?.restart?.policy || 'Unknown'}
                   </p>
                 </div>
-                {machine.config.services && machine.config.services.length > 0 && (
+                {machine?.config?.services && machine.config.services.length > 0 && (
                   <div>
                     <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Services</p>
                     <div className="mt-1 space-y-2">
@@ -516,14 +516,14 @@ export default function MachineDetailsPage() {
           <div className="mx-6 mb-6 p-6 bg-white dark:bg-gray-800">
             <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-4">Configuration</h2>
             
-            {machine.config.env && Object.keys(machine.config.env).length > 0 && (
+            {machine?.config?.env && Object.keys(machine.config.env).length > 0 && (
               <div className="mt-0">
                 <h3 className="text-md font-medium text-gray-800 dark:text-gray-200 mb-2">Environment Variables</h3>
                 <CopyableJson data={machine.config.env} />
               </div>
             )}
             
-            {machine.config.services && machine.config.services.length > 0 && (
+            {machine?.config?.services && machine.config.services.length > 0 && (
               <div className="mt-6">
                 <h3 className="text-md font-medium text-gray-800 dark:text-gray-200 mb-2">Services</h3>
                 <CopyableJson data={machine.config.services} />
@@ -611,29 +611,32 @@ export default function MachineDetailsPage() {
   );
 }
 
+// Interface and component for rendering event rows
 interface EventRowProps {
   event: MachineEvent;
 }
 
 function EventRow({ event }: EventRowProps) {
-  const statusColors: Record<string, string> = {
-    success: 'text-green-600 dark:text-green-400',
-    failure: 'text-red-600 dark:text-red-400',
-    pending: 'text-yellow-600 dark:text-yellow-400',
+  const getStatusClass = () => {
+    const statusClasses = {
+      succeeded: 'bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100',
+      failed: 'bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-100',
+      pending: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-800 dark:text-yellow-100'
+    };
+    
+    return statusClasses[event.status as keyof typeof statusClasses] || 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-100';
   };
-
+  
   return (
-    <tr className="hover:bg-gray-50 dark:hover:bg-gray-800">
-      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+    <tr>
+      <td className="px-6 py-4 whitespace-nowrap">
         <TimeAgo date={event.timestamp} />
       </td>
       <td className="px-6 py-4 whitespace-nowrap">
-        <Badge variant="secondary" className="rounded-full">
-          {event.type}
-        </Badge>
+        <span className="capitalize">{event.type}</span>
       </td>
       <td className="px-6 py-4 whitespace-nowrap">
-        <span className={`text-sm font-medium ${statusColors[event.status] || 'text-gray-600 dark:text-gray-400'}`}>
+        <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusClass()}`}>
           {event.status}
         </span>
       </td>
