@@ -19,14 +19,16 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Badge } from '@/components/ui/badge';
+import { WarningDialog } from '@/components/ui/warning-dialog';
 
 export default function AppDetailsPage() {
-  const params = useParams();
-  const appName = params.appName as string;
   const { isAuthenticated } = useApi();
+  const params = useParams();
+  const appName = params?.appName as string;
   const router = useRouter();
   const [isDeleting, setIsDeleting] = useState(false);
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
+  const [warningDeleteOpen, setWarningDeleteOpen] = useState(false);
   const [isAppAccessible, setIsAppAccessible] = useState(false);
   const [isCheckingAccess, setIsCheckingAccess] = useState(false);
   const appUrl = `https://${appName}.fly.dev`;
@@ -102,7 +104,16 @@ export default function AppDetailsPage() {
     return statusClasses[status.toLowerCase()] || 'bg-blue-100 text-blue-800 dark:bg-blue-800 dark:text-blue-100 border-blue-200 dark:border-blue-700';
   };
 
+  const openDeleteWarning = () => {
+    setWarningDeleteOpen(true);
+  };
+
+  const closeDeleteWarning = () => {
+    setWarningDeleteOpen(false);
+  };
+
   const openDeleteConfirm = () => {
+    setWarningDeleteOpen(false);
     setConfirmDeleteOpen(true);
   };
 
@@ -246,10 +257,11 @@ export default function AppDetailsPage() {
             View Machines
           </Link>
           <button
-            onClick={openDeleteConfirm}
+            onClick={openDeleteWarning}
+            className="flex items-center px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:opacity-50 cursor-pointer"
             disabled={isDeleting}
-            className="w-full md:w-auto px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer flex items-center justify-center"
           >
+            <Trash2 size={18} className="mr-2" />
             {isDeleting ? 'Deleting...' : 'Delete App'}
           </button>
         </div>
@@ -328,6 +340,22 @@ export default function AppDetailsPage() {
         </div>
       </div>
 
+      {/* Warning Dialog */}
+      <WarningDialog
+        isOpen={warningDeleteOpen}
+        onClose={closeDeleteWarning}
+        onConfirm={openDeleteConfirm}
+        title="Delete App"
+        description={`Please review the consequences of deleting ${appName}.`}
+        warningPoints={[
+          `This will permanently delete the app ${appName} and all associated resources.`,
+          "All machines in this app will be permanently deleted.",
+          "All volumes attached to these machines will be permanently deleted.",
+          "This action cannot be undone."
+        ]}
+        confirmText="I understand"
+      />
+
       {/* Confirmation Dialog */}
       <ConfirmationDialog
         isOpen={confirmDeleteOpen}
@@ -337,6 +365,9 @@ export default function AppDetailsPage() {
         description="This action cannot be undone. This will permanently delete this app and all associated resources."
         confirmText="Delete"
         destructive={true}
+        requireValidation={true}
+        validationText={appName}
+        validationLabel={`To confirm deletion, please type "${appName}"`}
       />
     </div>
   );
