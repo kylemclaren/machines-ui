@@ -47,10 +47,10 @@ import { Badge } from '@/components/ui/badge';
 import { MachineActionButtons } from '@/components/dashboard/MachineActionButtons';
 
 export default function MachineDetailsPage() {
-  const params = useParams();
-  const appName = params.appName as string;
-  const machineId = params.machineId as string;
   const { isAuthenticated } = useApi();
+  const params = useParams();
+  const appName = params?.appName as string;
+  const machineId = params?.machineId as string;
   const router = useRouter();
   const queryClient = useQueryClient();
   const [isLoading, setIsLoading] = useState(false);
@@ -598,6 +598,9 @@ export default function MachineDetailsPage() {
         description={getConfirmationMessage().description}
         confirmText={confirmAction === 'delete' ? 'Delete' : 'Confirm'}
         destructive={confirmAction === 'delete'}
+        requireValidation={confirmAction === 'delete'}
+        validationText={confirmAction === 'delete' ? machine?.name || machineId : ''}
+        validationLabel={confirmAction === 'delete' ? `To confirm deletion, please type "${machine?.name || machineId}"` : ''}
       />
 
       {/* Terminal Dialog */}

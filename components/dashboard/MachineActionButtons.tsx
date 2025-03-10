@@ -98,15 +98,17 @@ export function MachineActionButtons({
             Run
           </button>
         )}
-        <button
-          onClick={() => onAction('delete')}
-          disabled={isLoading}
-          className="action-btn px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:opacity-50 flex items-center cursor-pointer"
-          style={{ '--btn-index': '5' } as React.CSSProperties}
-        >
-          <Trash2 size={18} className="mr-2" />
-          Delete
-        </button>
+        {machineState !== 'started' && (
+          <button
+            onClick={() => onAction('delete')}
+            disabled={isLoading}
+            className="action-btn px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:opacity-50 flex items-center cursor-pointer"
+            style={{ '--btn-index': '5' } as React.CSSProperties}
+          >
+            <Trash2 size={18} className="mr-2" />
+            Delete
+          </button>
+        )}
       </div>
       
       {/* Improved animation styles to prevent flickering */}
