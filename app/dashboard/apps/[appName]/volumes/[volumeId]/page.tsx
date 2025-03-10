@@ -54,8 +54,8 @@ interface ExtendedVolume extends BaseVolume {
 
 export default function VolumeDetailsPage() {
   const params = useParams();
-  const appName = params.appName as string;
-  const volumeId = params.volumeId as string;
+  const appName = params?.appName as string;
+  const volumeId = params?.volumeId as string;
   const { isAuthenticated } = useApi();
   const router = useRouter();
   
@@ -433,10 +433,23 @@ export default function VolumeDetailsPage() {
                   <div>
                     <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Disk Usage</p>
                     <div className="mt-2 space-y-1">
-                      <Progress 
-                        value={Math.max(0, Math.min(100, 100 * (1 - volume.blocks_free / volume.blocks)))} 
-                        className="h-2.5 [&>div]:bg-blue-600 dark:[&>div]:bg-blue-600"
-                      />
+                      {(() => {
+                        const usagePercent = Math.max(0, Math.min(100, 100 * (1 - volume.blocks_free / volume.blocks)));
+                        let colorClass = "h-2.5 [&>div]:bg-blue-600 dark:[&>div]:bg-blue-600";
+                        
+                        if (usagePercent >= 90) {
+                          colorClass = "h-2.5 [&>div]:bg-red-600 dark:[&>div]:bg-red-600";
+                        } else if (usagePercent >= 80) {
+                          colorClass = "h-2.5 [&>div]:bg-yellow-600 dark:[&>div]:bg-yellow-500";
+                        }
+                        
+                        return (
+                          <Progress 
+                            value={usagePercent} 
+                            className={colorClass}
+                          />
+                        );
+                      })()}
                       <p className="text-sm text-gray-900 dark:text-white">
                         {Math.round(100 * (1 - volume.blocks_free / volume.blocks))}% used
                         {showBlocks && ` (${(volume.blocks - volume.blocks_free).toLocaleString()} of ${volume.blocks.toLocaleString()} blocks)`}
