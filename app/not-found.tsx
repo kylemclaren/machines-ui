@@ -4,13 +4,37 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { ArrowUp, ArrowLeft } from 'lucide-react';
 
+// Custom type for our CSS variables
+type WaveStyleProps = React.CSSProperties & {
+  '--wave-angle': string;
+  '--wave-gradient': string;
+  '--wave-opacity': string;
+};
+
 export default function NotFound() {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-background px-4 overflow-hidden relative">
-      {/* Background decoration - visible in both themes */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute w-[500px] h-[500px] rounded-full bg-purple-300/10 dark:bg-purple-900/20 blur-3xl -top-20 -left-20"></div>
-        <div className="absolute w-[400px] h-[400px] rounded-full bg-purple-300/10 dark:bg-purple-900/20 blur-3xl -bottom-20 -right-20"></div>
+      {/* Decorative wave background - light theme only */}
+      <div 
+        className="absolute inset-0 overflow-hidden pointer-events-none dark:hidden"
+        style={{
+          '--wave-angle': '180deg',
+          '--wave-gradient': 'linear-gradient(var(--wave-angle), hsla(0, 0%, 0%, 0.125) 50%, hsla(0, 0%, 0%, 0.75))',
+          '--wave-opacity': '0.35',
+          backgroundImage: `linear-gradient(to right,
+              hsla(217, 91%, 60%, var(--wave-opacity)),
+              hsla(277, 87%, 63%, var(--wave-opacity)),
+              hsla(189, 94%, 43%, var(--wave-opacity))),
+            url("data:image/svg+xml,<svg id='patternId' width='100%' height='100%' xmlns='http://www.w3.org/2000/svg'><defs><pattern id='a' patternUnits='userSpaceOnUse' width='80' height='20' patternTransform='scale(1) rotate(35)'><rect x='0' y='0' width='100%' height='100%' fill='none'/><path d='M-20.133 4.568C-13.178 4.932-6.452 7.376 0 10c6.452 2.624 13.036 5.072 20 5 6.967-.072 13.56-2.341 20-5 6.44-2.659 13.033-4.928 20-5 6.964-.072 13.548 2.376 20 5s13.178 5.068 20.133 5.432' stroke-width='0.5' stroke='hsla(258,90%,66%,.25)' fill='none'/></pattern></defs><rect width='800%' height='800%' transform='translate(0,0)' fill='url(%23a)'/></svg>")`,
+          WebkitMask: 'var(--wave-gradient)',
+          mask: 'var(--wave-gradient)',
+        } as WaveStyleProps}
+      />
+
+      {/* Dark theme background */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none hidden dark:block">
+        <div className="absolute w-[500px] h-[500px] rounded-full bg-purple-900/20 blur-3xl -top-20 -left-20"></div>
+        <div className="absolute w-[400px] h-[400px] rounded-full bg-purple-900/20 blur-3xl -bottom-20 -right-20"></div>
       </div>
 
       <div className="relative z-10 text-center max-w-3xl">
@@ -50,7 +74,7 @@ export default function NotFound() {
           
           <button 
             onClick={() => window.history.back()}
-            className="inline-flex items-center justify-center px-6 py-3 rounded-lg bg-secondary text-secondary-foreground hover:bg-secondary/80 font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900 cursor-pointer"
+            className="inline-flex items-center justify-center px-6 py-3 rounded-lg bg-secondary text-secondary-foreground border border-gray-200 dark:border-gray-700 hover:bg-secondary/90 hover:text-violet-700 dark:hover:text-secondary-foreground hover:border-violet-500 dark:hover:border-violet-500 font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900 cursor-pointer"
           >
             <ArrowLeft className="w-5 h-5 mr-2" />
             <span>Go Back</span>
