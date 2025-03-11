@@ -258,7 +258,7 @@ export default function AppDetailsPage() {
           </Link>
           <button
             onClick={openDeleteWarning}
-            className="flex items-center px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:opacity-50 cursor-pointer"
+            className="flex items-center justify-center px-4 py-2 border border-red-300 dark:border-red-600 bg-white dark:bg-gray-800 text-red-600 dark:text-red-400 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 cursor-pointer transition-colors"
             disabled={isDeleting}
           >
             <Trash2 size={18} className="mr-2" />

@@ -312,92 +312,109 @@ export default function MachineDetailsPage() {
       </div>
       
       <main className="flex-1 overflow-auto p-4 md:p-6">
-        {/* Add Back to Machines button at the top of the page */}
-        <div className="mb-6">
+        {/* Add Back to Machines button and actions at the top of the page */}
+        <div className="mb-6 flex justify-between items-center">
           <Link
             href={`/dashboard/apps/${appName}/machines`}
-            className="inline-flex px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-100 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 items-center"
+            className="inline-flex items-center justify-center px-4 py-2 h-10 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-100 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600"
           >
             <ArrowLeft size={16} className="mr-2" />
             Back to Machines
           </Link>
+          
+          {/* Action buttons */}
+          {machine && (
+            <>
+              {/* Desktop view - Show expanded buttons */}
+              <div className="hidden md:flex items-center">
+                <MachineActionButtons 
+                  machineState={machine.state}
+                  isLoading={isLoading}
+                  onAction={openConfirmation}
+                  onOpenTerminal={openTerminal}
+                />
+              </div>
+              
+              {/* Mobile view - Show dropdown menu */}
+              <div className="md:hidden">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button className="h-10 w-10 flex items-center justify-center rounded-md bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 hover:bg-blue-200 dark:hover:bg-blue-800/40 transition-all duration-300 focus:outline-none cursor-pointer">
+                      <Cog size={20} />
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-40">
+                    {machine?.state !== 'started' && (
+                      <DropdownMenuItem 
+                        onClick={() => openConfirmation('start')}
+                        disabled={isLoading}
+                        className="cursor-pointer"
+                      >
+                        <Play size={16} className="mr-2" />
+                        Start
+                      </DropdownMenuItem>
+                    )}
+                    {machine?.state === 'started' && (
+                      <DropdownMenuItem 
+                        onClick={() => openConfirmation('stop')}
+                        disabled={isLoading}
+                        className="cursor-pointer"
+                      >
+                        <Square size={16} className="mr-2" />
+                        Stop
+                      </DropdownMenuItem>
+                    )}
+                    <DropdownMenuItem 
+                      onClick={() => openConfirmation('restart')}
+                      disabled={isLoading}
+                      className="cursor-pointer"
+                    >
+                      <RotateCw size={16} className="mr-2" />
+                      Restart
+                    </DropdownMenuItem>
+                    {machine?.state === 'started' && (
+                      <DropdownMenuItem 
+                        onClick={() => openConfirmation('suspend')}
+                        disabled={isLoading}
+                        className="cursor-pointer"
+                      >
+                        <Pause size={16} className="mr-2" />
+                        Suspend
+                      </DropdownMenuItem>
+                    )}
+                    {machine?.state === 'started' && (
+                      <DropdownMenuItem 
+                        onClick={openTerminal}
+                        disabled={isLoading}
+                        className="cursor-pointer"
+                      >
+                        <Terminal size={16} className="mr-2" />
+                        Run
+                      </DropdownMenuItem>
+                    )}
+                    {machine?.state !== 'started' && (
+                      <DropdownMenuItem 
+                        onClick={() => openConfirmation('delete')}
+                        disabled={isLoading}
+                        className="cursor-pointer text-red-600 dark:text-red-400"
+                      >
+                        <Trash2 size={16} className="mr-2" />
+                        Delete
+                      </DropdownMenuItem>
+                    )}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            </>
+          )}
         </div>
 
         {/* Content section */}
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden relative">
-          {/* Mobile action button - positioned in the top right corner */}
-          <div className="absolute top-4 right-4 md:hidden z-10">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button className="p-2.5 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 hover:bg-blue-200 dark:hover:bg-blue-800/40 transition-all duration-300 focus:outline-none cursor-pointer flex items-center justify-center">
-                  <Cog size={22} />
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-40">
-                {machine?.state !== 'started' && (
-                  <DropdownMenuItem 
-                    onClick={() => openConfirmation('start')}
-                    disabled={isLoading}
-                    className="cursor-pointer"
-                  >
-                    <Play size={16} className="mr-2" />
-                    Start
-                  </DropdownMenuItem>
-                )}
-                {machine?.state === 'started' && (
-                  <DropdownMenuItem 
-                    onClick={() => openConfirmation('stop')}
-                    disabled={isLoading}
-                    className="cursor-pointer"
-                  >
-                    <Square size={16} className="mr-2" />
-                    Stop
-                  </DropdownMenuItem>
-                )}
-                <DropdownMenuItem 
-                  onClick={() => openConfirmation('restart')}
-                  disabled={isLoading}
-                  className="cursor-pointer"
-                >
-                  <RotateCw size={16} className="mr-2" />
-                  Restart
-                </DropdownMenuItem>
-                {machine?.state === 'started' && (
-                  <DropdownMenuItem 
-                    onClick={() => openConfirmation('suspend')}
-                    disabled={isLoading}
-                    className="cursor-pointer"
-                  >
-                    <Pause size={16} className="mr-2" />
-                    Suspend
-                  </DropdownMenuItem>
-                )}
-                {machine?.state === 'started' && (
-                  <DropdownMenuItem 
-                    onClick={openTerminal}
-                    disabled={isLoading}
-                    className="cursor-pointer"
-                  >
-                    <Terminal size={16} className="mr-2" />
-                    Run
-                  </DropdownMenuItem>
-                )}
-                <DropdownMenuItem 
-                  onClick={() => openConfirmation('delete')}
-                  disabled={isLoading}
-                  className="cursor-pointer text-red-600 focus:text-red-600 focus:bg-red-50 dark:focus:bg-red-950"
-                >
-                  <Trash2 size={16} className="mr-2" />
-                  Delete
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-gray-200 dark:border-gray-700 px-6 py-4">
+          <div className="flex items-center justify-between border-b border-gray-200 dark:border-gray-700 p-6">
             <div>
-              <h1 className="text-xl font-semibold text-gray-900 dark:text-white flex items-center">
-                {machine?.name}
+              <h1 className="flex items-center text-2xl font-bold text-gray-900 dark:text-white">
+                {machine?.name || machineId}
                 {isLoading && <Loader2 className="ml-2 h-4 w-4 animate-spin" />}
                 {machine && (
                   <Badge 
@@ -410,17 +427,6 @@ export default function MachineDetailsPage() {
               <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
                 Machine details and configuration
               </p>
-            </div>
-            <div className="flex space-x-2 mt-4 md:mt-0">
-              {/* Desktop action buttons */}
-              {machine && (
-                <MachineActionButtons 
-                  machineState={machine.state}
-                  isLoading={isLoading}
-                  onAction={openConfirmation}
-                  onOpenTerminal={openTerminal}
-                />
-              )}
             </div>
           </div>
 
