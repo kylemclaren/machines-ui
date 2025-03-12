@@ -54,7 +54,7 @@ export default function Error({
         <div className="mb-12 relative w-54 h-54 mx-auto select-none">
           <div className="absolute -inset-8 bg-purple-200/30 dark:bg-purple-900/30 rounded-full blur-xl"></div>
           <Image
-            src="/static/images/frankie_error.png"
+            src="/static/images/frankie.webp"
             alt="Purple balloon character looking confused"
             width={214}
             height={214}
