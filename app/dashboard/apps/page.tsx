@@ -20,11 +20,31 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import { Badge } from '@/components/ui/badge';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
 
 export default function AppsPage() {
   const router = useRouter();
   const { orgSlug, isAuthenticated } = useApi();
   const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
   const [appStatuses, setAppStatuses] = useState<Record<string, string>>({});
   const [loadingStatuses, setLoadingStatuses] = useState<Record<string, boolean>>({});
   const [createAppOpen, setCreateAppOpen] = useState(false);
@@ -76,20 +96,29 @@ export default function AppsPage() {
     });
   }, [apps]);
 
-  // Filter apps based on search term
-  const filteredApps = apps?.filter((app) =>
-    app.name.toLowerCase().includes(searchTerm.toLowerCase())
-  ).sort((a, b) => a.name.localeCompare(b.name));
+  // Reset to page 1 when search term or status filter changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, statusFilter]);
+
+  // Get unique available statuses for filter options
+  const getAvailableStatuses = () => {
+    const statuses = new Set(Object.values(appStatuses));
+    return Array.from(statuses).sort();
+  };
+
+  // Filter apps based on search term and status
+  const filteredApps = apps?.filter((app) => {
+    const nameMatch = app.name.toLowerCase().includes(searchTerm.toLowerCase());
+    const status = appStatuses[app.name] || 'unknown';
+    const statusMatch = statusFilter === 'all' || status.toLowerCase() === statusFilter.toLowerCase();
+    return nameMatch && statusMatch;
+  }).sort((a, b) => a.name.localeCompare(b.name));
 
   // Pagination logic
   const totalItems = filteredApps?.length || 0;
   const totalPages = Math.ceil(totalItems / itemsPerPage);
   
-  // Reset to page 1 when search term changes
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [searchTerm]);
-
   // Calculate the current page items
   const currentItems = filteredApps?.slice(
     (currentPage - 1) * itemsPerPage,
@@ -188,7 +217,6 @@ export default function AppsPage() {
   const getStatusColor = (status: string) => {
     const statusColors: Record<string, string> = {
       deployed: 'bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100',
-      running: 'bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100',
       pending: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-800 dark:text-yellow-100',
       failed: 'bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-100',
       suspended: 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300',
@@ -200,7 +228,6 @@ export default function AppsPage() {
   const getStatusVariant = (status: string): "default" | "destructive" | "outline" | "secondary" | null => {
     const statusVariants: Record<string, "default" | "destructive" | "outline" | "secondary"> = {
       deployed: 'default', // Green
-      running: 'default', // Green
       pending: 'outline', // Yellow
       failed: 'destructive', // Red
       suspended: 'secondary', // Gray
@@ -212,7 +239,6 @@ export default function AppsPage() {
   const getStatusClass = (status: string): string => {
     const statusClasses: Record<string, string> = {
       deployed: 'bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100 border-green-200 dark:border-green-700',
-      running: 'bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100 border-green-200 dark:border-green-700',
       pending: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-800 dark:text-yellow-100 border-yellow-200 dark:border-yellow-700',
       failed: 'bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-100 border-red-200 dark:border-red-700',
       suspended: 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-600',
@@ -248,8 +274,11 @@ export default function AppsPage() {
 
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
         <div className="p-4 border-b border-gray-200 dark:border-gray-700">
-          <div className="flex items-center">
+          <div className="flex flex-col md:flex-row md:items-end gap-4">
             <div className="flex-1">
+              <div className="mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
+                Search
+              </div>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                   <svg
@@ -268,12 +297,92 @@ export default function AppsPage() {
                 </div>
                 <input
                   type="text"
-                  className="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md leading-5 bg-white dark:bg-gray-700 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:text-white"
+                  className="block w-full pl-10 pr-3 py-2 h-10 border border-gray-300 dark:border-gray-600 rounded-md leading-5 bg-white dark:bg-gray-700 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:text-white"
                   placeholder="Search apps"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
               </div>
+            </div>
+            <div className="md:w-64">
+              <div className="mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
+                Filter by Status
+              </div>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" className="w-full justify-between bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white h-10">
+                    {statusFilter === 'all' ? 'All Statuses' : (
+                      <div className="flex items-center">
+                        <span className={`w-2 h-2 rounded-full mr-2 ${getStatusClass(statusFilter)}`}></span>
+                        {statusFilter.charAt(0).toUpperCase() + statusFilter.slice(1)}
+                      </div>
+                    )}
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="24"
+                      height="24"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="ml-2 h-4 w-4"
+                    >
+                      <path d="m6 9 6 6 6-6" />
+                    </svg>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-56">
+                  <DropdownMenuLabel>App Status</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuRadioGroup value={statusFilter} onValueChange={setStatusFilter}>
+                    <DropdownMenuRadioItem value="all">
+                      All Statuses
+                    </DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value="deployed">
+                      <div className="flex items-center">
+                        <span className="w-2 h-2 rounded-full mr-2 bg-green-500"></span>
+                        Deployed
+                      </div>
+                    </DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value="pending">
+                      <div className="flex items-center">
+                        <span className="w-2 h-2 rounded-full mr-2 bg-yellow-500"></span>
+                        Pending
+                      </div>
+                    </DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value="failed">
+                      <div className="flex items-center">
+                        <span className="w-2 h-2 rounded-full mr-2 bg-red-500"></span>
+                        Failed
+                      </div>
+                    </DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value="suspended">
+                      <div className="flex items-center">
+                        <span className="w-2 h-2 rounded-full mr-2 bg-gray-500"></span>
+                        Suspended
+                      </div>
+                    </DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value="unknown">
+                      <div className="flex items-center">
+                        <span className="w-2 h-2 rounded-full mr-2 bg-gray-500"></span>
+                        Unknown
+                      </div>
+                    </DropdownMenuRadioItem>
+                    {getAvailableStatuses().map(status => (
+                      !['deployed', 'pending', 'failed', 'suspended', 'unknown'].includes(status.toLowerCase()) && (
+                        <DropdownMenuRadioItem key={status} value={status.toLowerCase()}>
+                          <div className="flex items-center">
+                            <span className="w-2 h-2 rounded-full mr-2 bg-blue-500"></span>
+                            {status}
+                          </div>
+                        </DropdownMenuRadioItem>
+                      )
+                    ))}
+                  </DropdownMenuRadioGroup>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </div>
         </div>
