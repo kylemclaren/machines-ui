@@ -42,6 +42,16 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Drawer,
+  DrawerClose,
+  DrawerContent,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@/components/ui/drawer";
 import { TerminalDialog } from '@/components/ui/terminal-dialog';
 import { Badge } from '@/components/ui/badge';
 import { MachineActionButtons } from '@/components/dashboard/MachineActionButtons';
@@ -335,75 +345,120 @@ export default function MachineDetailsPage() {
                 />
               </div>
               
-              {/* Mobile view - Show dropdown menu */}
+              {/* Mobile view - Show drawer */}
               <div className="md:hidden">
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
+                <Drawer>
+                  <DrawerTrigger asChild>
                     <button className="h-10 w-10 flex items-center justify-center rounded-md bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 hover:bg-blue-200 dark:hover:bg-blue-800/40 transition-all duration-300 focus:outline-none cursor-pointer">
                       <Cog size={20} />
                     </button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-40">
-                    {machine?.state !== 'started' && (
-                      <DropdownMenuItem 
-                        onClick={() => openConfirmation('start')}
+                  </DrawerTrigger>
+                  <DrawerContent>
+                    <DrawerHeader>
+                      <DrawerTitle className="text-center">Machine Actions</DrawerTitle>
+                      <DrawerDescription className="text-center">
+                        Manage {machine?.name || machineId}
+                      </DrawerDescription>
+                    </DrawerHeader>
+                    <div className="px-4 py-2 space-y-3">
+                      {machine?.state !== 'started' && (
+                        <button
+                          onClick={() => {
+                            openConfirmation('start');
+                            document.querySelector('[data-state="open"]')?.dispatchEvent(
+                              new KeyboardEvent('keydown', { key: 'Escape' })
+                            );
+                          }}
+                          disabled={isLoading}
+                          className="w-full flex items-center justify-center gap-2 py-3 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50 transition-colors"
+                        >
+                          <Play size={16} />
+                          Start Machine
+                        </button>
+                      )}
+                      {machine?.state === 'started' && (
+                        <button
+                          onClick={() => {
+                            openConfirmation('stop');
+                            document.querySelector('[data-state="open"]')?.dispatchEvent(
+                              new KeyboardEvent('keydown', { key: 'Escape' })
+                            );
+                          }}
+                          disabled={isLoading}
+                          className="w-full flex items-center justify-center gap-2 py-3 bg-yellow-600 text-white rounded-md hover:bg-yellow-700 disabled:opacity-50 transition-colors"
+                        >
+                          <Square size={16} />
+                          Stop Machine
+                        </button>
+                      )}
+                      <button
+                        onClick={() => {
+                          openConfirmation('restart');
+                          document.querySelector('[data-state="open"]')?.dispatchEvent(
+                            new KeyboardEvent('keydown', { key: 'Escape' })
+                          );
+                        }}
                         disabled={isLoading}
-                        className="cursor-pointer"
+                        className="w-full flex items-center justify-center gap-2 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 transition-colors"
                       >
-                        <Play size={16} className="mr-2" />
-                        Start
-                      </DropdownMenuItem>
-                    )}
-                    {machine?.state === 'started' && (
-                      <DropdownMenuItem 
-                        onClick={() => openConfirmation('stop')}
-                        disabled={isLoading}
-                        className="cursor-pointer"
-                      >
-                        <Square size={16} className="mr-2" />
-                        Stop
-                      </DropdownMenuItem>
-                    )}
-                    <DropdownMenuItem 
-                      onClick={() => openConfirmation('restart')}
-                      disabled={isLoading}
-                      className="cursor-pointer"
-                    >
-                      <RotateCw size={16} className="mr-2" />
-                      Restart
-                    </DropdownMenuItem>
-                    {machine?.state === 'started' && (
-                      <DropdownMenuItem 
-                        onClick={() => openConfirmation('suspend')}
-                        disabled={isLoading}
-                        className="cursor-pointer"
-                      >
-                        <Pause size={16} className="mr-2" />
-                        Suspend
-                      </DropdownMenuItem>
-                    )}
-                    {machine?.state === 'started' && (
-                      <DropdownMenuItem 
-                        onClick={openTerminal}
-                        disabled={isLoading}
-                        className="cursor-pointer"
-                      >
-                        <Terminal size={16} className="mr-2" />
-                        Run
-                      </DropdownMenuItem>
-                    )}
-                    {machine?.state !== 'started' && (
-                      <DropdownMenuItem 
-                        onClick={() => openConfirmation('delete')}
-                        disabled={isLoading}
-                        className="cursor-pointer text-red-600 dark:text-red-400"
-                      >
-                        <Trash2 size={16} className="mr-2" />
-                        Delete
-                      </DropdownMenuItem>
-                    )}
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                        <RotateCw size={16} />
+                        Restart Machine
+                      </button>
+                      {machine?.state === 'started' && (
+                        <button
+                          onClick={() => {
+                            openConfirmation('suspend');
+                            document.querySelector('[data-state="open"]')?.dispatchEvent(
+                              new KeyboardEvent('keydown', { key: 'Escape' })
+                            );
+                          }}
+                          disabled={isLoading}
+                          className="w-full flex items-center justify-center gap-2 py-3 bg-purple-600 text-white rounded-md hover:bg-purple-700 disabled:opacity-50 transition-colors"
+                        >
+                          <Pause size={16} />
+                          Suspend Machine
+                        </button>
+                      )}
+                      {machine?.state === 'started' && (
+                        <button
+                          onClick={() => {
+                            openTerminal();
+                            document.querySelector('[data-state="open"]')?.dispatchEvent(
+                              new KeyboardEvent('keydown', { key: 'Escape' })
+                            );
+                          }}
+                          disabled={isLoading}
+                          className="w-full flex items-center justify-center gap-2 py-3 bg-gray-600 text-white rounded-md hover:bg-gray-700 disabled:opacity-50 transition-colors"
+                        >
+                          <Terminal size={16} />
+                          Run Terminal
+                        </button>
+                      )}
+                      {machine?.state !== 'started' && (
+                        <button
+                          onClick={() => {
+                            openConfirmation('delete');
+                            document.querySelector('[data-state="open"]')?.dispatchEvent(
+                              new KeyboardEvent('keydown', { key: 'Escape' })
+                            );
+                          }}
+                          disabled={isLoading}
+                          className="w-full flex items-center justify-center gap-2 py-3 bg-white dark:bg-gray-800 text-red-600 dark:text-red-400 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 transition-colors border border-red-300 dark:border-red-600"
+                        >
+                          <Trash2 size={16} />
+                          Delete Machine
+                        </button>
+                      )}
+                    </div>
+                    <DrawerFooter>
+                      <DrawerClose asChild>
+                        <button className="w-full py-3 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
+                          Cancel
+                        </button>
+                      </DrawerClose>
+                    </DrawerFooter>
+                  </DrawerContent>
+                </Drawer>
               </div>
             </>
           )}

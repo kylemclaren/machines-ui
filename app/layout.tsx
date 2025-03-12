@@ -16,7 +16,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Fly.io Machines Dashboard",
+  title: "Fly.io Machines UI",
   description: "A dashboard for managing Fly.io Apps, Machines, and Volumes",
 };
 
