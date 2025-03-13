@@ -7,8 +7,9 @@ import flyApi from '../../../lib/api-client';
 import { Volume } from '../../../types/api';
 import Link from 'next/link';
 import { TimeAgo } from "@/components/ui/time-ago";
-import { Loader2 } from 'lucide-react';
+import { Loader2, Check, ChevronsUpDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -28,10 +29,25 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import { cn, getRegionFlag } from "@/lib/utils";
 
 export default function VolumesPage() {
   const { orgSlug, isAuthenticated } = useApi();
   const [selectedApp, setSelectedApp] = useState<string | null>(null);
+  const [open, setOpen] = useState(false);
 
   // Get all apps
   const { data: apps, isLoading: isLoadingApps } = useQuery(
@@ -100,48 +116,54 @@ export default function VolumesPage() {
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Select App
               </label>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" className="w-full justify-between bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white">
-                    {selectedApp || "Select an app"}
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="ml-2 h-4 w-4"
-                    >
-                      <path d="m6 9 6 6 6-6" />
-                    </svg>
+              <Popover open={open} onOpenChange={setOpen}>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    role="combobox"
+                    aria-expanded={open}
+                    className="w-full justify-between bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
+                  >
+                    {selectedApp ? selectedApp : "Select an app..."}
+                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                   </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-56">
-                  <DropdownMenuLabel>Apps</DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  {isLoadingApps ? (
-                    <DropdownMenuItem disabled>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Loading apps...
-                    </DropdownMenuItem>
-                  ) : (
-                    <DropdownMenuRadioGroup value={selectedApp || ""} onValueChange={(value) => setSelectedApp(value || null)}>
-                      <DropdownMenuRadioItem value="">
-                        Select an app
-                      </DropdownMenuRadioItem>
+                </PopoverTrigger>
+                <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0" align="start" sideOffset={4}>
+                  <Command>
+                    <CommandInput placeholder="Search apps..." className="h-9" />
+                    <CommandEmpty>
+                      {isLoadingApps ? (
+                        <div className="flex items-center justify-center py-6">
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Loading apps...
+                        </div>
+                      ) : (
+                        "No apps found."
+                      )}
+                    </CommandEmpty>
+                    <CommandGroup>
                       {apps?.map((app) => (
-                        <DropdownMenuRadioItem key={app.id} value={app.name}>
+                        <CommandItem
+                          key={app.id}
+                          onSelect={() => {
+                            setSelectedApp(app.name);
+                            setOpen(false);
+                          }}
+                          className="cursor-pointer"
+                        >
+                          <Check
+                            className={cn(
+                              "mr-2 h-4 w-4",
+                              selectedApp === app.name ? "opacity-100" : "opacity-0"
+                            )}
+                          />
                           {app.name}
-                        </DropdownMenuRadioItem>
+                        </CommandItem>
                       ))}
-                    </DropdownMenuRadioGroup>
-                  )}
-                </DropdownMenuContent>
-              </DropdownMenu>
+                    </CommandGroup>
+                  </Command>
+                </PopoverContent>
+              </Popover>
             </div>
           </div>
         </div>
@@ -169,6 +191,9 @@ export default function VolumesPage() {
                     </th>
                     <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                       Region
+                    </th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                      Zone
                     </th>
                     <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                       Created
@@ -203,6 +228,13 @@ interface VolumeRowProps {
 
 function VolumeRow({ volume, appName }: VolumeRowProps) {
   const isAttached = !!volume.attached_machine_id;
+  
+  // Get custom class for volume status badge
+  const getStatusClass = (attached: boolean): string => {
+    return attached 
+      ? 'bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100 border-green-200 dark:border-green-700'
+      : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-800 dark:text-yellow-100 border-yellow-200 dark:border-yellow-700';
+  };
 
   return (
     <tr className="hover:bg-gray-50 dark:hover:bg-gray-700">
@@ -219,16 +251,23 @@ function VolumeRow({ volume, appName }: VolumeRowProps) {
         {volume.size_gb} GB
       </td>
       <td className="px-6 py-4 whitespace-nowrap">
-        <div className="text-sm text-gray-500 dark:text-gray-400">{volume.region}</div>
-        <div className="text-xs text-gray-500 dark:text-gray-400">{volume.zone}</div>
+        <div className="flex items-center">
+          <span className="text-xl mr-2" title={volume.region || 'Unknown region'}>
+            {getRegionFlag(volume.region)}
+          </span>
+          <div className="text-sm text-gray-500 dark:text-gray-400">{volume.region}</div>
+        </div>
+      </td>
+      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+        {volume.zone || '-'}
       </td>
       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
         <TimeAgo date={volume.created_at} />
       </td>
       <td className="px-6 py-4 whitespace-nowrap">
-        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${isAttached ? 'bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100' : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-800 dark:text-yellow-100'}`}>
+        <Badge className={`rounded-full ${getStatusClass(isAttached)}`}>
           {isAttached ? 'Attached' : 'Detached'}
-        </span>
+        </Badge>
         {isAttached && (
           <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
             Machine: {volume.attached_machine_id}

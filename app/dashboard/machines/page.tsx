@@ -7,8 +7,9 @@ import flyApi from '../../../lib/api-client';
 import { Machine } from '../../../types/api';
 import Link from 'next/link';
 import { TimeAgo } from "@/components/ui/time-ago";
-import { Loader2, Check } from 'lucide-react';
+import { Loader2, Check, ChevronsUpDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -28,11 +29,27 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import { cn, getRegionFlag } from "@/lib/utils";
 
 export default function MachinesPage() {
   const { orgSlug, isAuthenticated } = useApi();
   const [selectedApp, setSelectedApp] = useState<string | null>(null);
   const [filterState, setFilterState] = useState<string | null>(null);
+  const [open, setOpen] = useState(false);
+  const [openFilter, setOpenFilter] = useState(false);
 
   // Get all apps
   const { data: apps, isLoading: isLoadingApps } = useQuery(
@@ -51,6 +68,13 @@ export default function MachinesPage() {
       enabled: isAuthenticated && !!selectedApp,
     }
   );
+
+  const states = [
+    { label: "All states", value: "" },
+    { label: "Started", value: "started" },
+    { label: "Stopped", value: "stopped" },
+    { label: "Destroying", value: "destroying" }
+  ];
 
   if (!isAuthenticated) {
     return (
@@ -101,92 +125,99 @@ export default function MachinesPage() {
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Select App
               </label>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" className="w-full justify-between bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white">
-                    {selectedApp || "Select an app"}
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="ml-2 h-4 w-4"
-                    >
-                      <path d="m6 9 6 6 6-6" />
-                    </svg>
+              <Popover open={open} onOpenChange={setOpen}>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    role="combobox"
+                    aria-expanded={open}
+                    className="w-full justify-between bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
+                  >
+                    {selectedApp ? selectedApp : "Select an app..."}
+                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                   </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-56">
-                  <DropdownMenuLabel>Apps</DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  {isLoadingApps ? (
-                    <DropdownMenuItem disabled>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Loading apps...
-                    </DropdownMenuItem>
-                  ) : (
-                    <DropdownMenuRadioGroup value={selectedApp || ""} onValueChange={(value) => setSelectedApp(value || null)}>
-                      <DropdownMenuRadioItem value="">
-                        Select an app
-                      </DropdownMenuRadioItem>
+                </PopoverTrigger>
+                <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0" align="start" sideOffset={4}>
+                  <Command>
+                    <CommandInput placeholder="Search apps..." className="h-9" />
+                    <CommandEmpty>
+                      {isLoadingApps ? (
+                        <div className="flex items-center justify-center py-6">
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Loading apps...
+                        </div>
+                      ) : (
+                        "No apps found."
+                      )}
+                    </CommandEmpty>
+                    <CommandGroup>
                       {apps?.map((app) => (
-                        <DropdownMenuRadioItem key={app.id} value={app.name}>
+                        <CommandItem
+                          key={app.id}
+                          onSelect={() => {
+                            setSelectedApp(app.name);
+                            setOpen(false);
+                          }}
+                          className="cursor-pointer"
+                        >
+                          <Check
+                            className={cn(
+                              "mr-2 h-4 w-4",
+                              selectedApp === app.name ? "opacity-100" : "opacity-0"
+                            )}
+                          />
                           {app.name}
-                        </DropdownMenuRadioItem>
+                        </CommandItem>
                       ))}
-                    </DropdownMenuRadioGroup>
-                  )}
-                </DropdownMenuContent>
-              </DropdownMenu>
+                    </CommandGroup>
+                  </Command>
+                </PopoverContent>
+              </Popover>
             </div>
             <div className="sm:w-1/3">
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Filter by State
               </label>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild disabled={!selectedApp}>
-                  <Button variant="outline" className="w-full justify-between bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white disabled:bg-gray-100 dark:disabled:bg-gray-800 disabled:text-gray-500 dark:disabled:text-gray-500">
-                    {filterState || "All states"}
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="ml-2 h-4 w-4"
-                    >
-                      <path d="m6 9 6 6 6-6" />
-                    </svg>
+              <Popover open={openFilter} onOpenChange={setOpenFilter}>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    role="combobox"
+                    aria-expanded={openFilter}
+                    disabled={!selectedApp}
+                    className="w-full justify-between bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white disabled:bg-gray-100 dark:disabled:bg-gray-800 disabled:text-gray-500 dark:disabled:text-gray-500"
+                  >
+                    {filterState ? states.find(state => state.value === filterState)?.label : states[0].label}
+                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                   </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-56">
-                  <DropdownMenuLabel>Machine States</DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuRadioGroup value={filterState || ""} onValueChange={(value) => setFilterState(value || null)}>
-                    <DropdownMenuRadioItem value="">
-                      All states
-                    </DropdownMenuRadioItem>
-                    <DropdownMenuRadioItem value="started">
-                      Started
-                    </DropdownMenuRadioItem>
-                    <DropdownMenuRadioItem value="stopped">
-                      Stopped
-                    </DropdownMenuRadioItem>
-                    <DropdownMenuRadioItem value="destroying">
-                      Destroying
-                    </DropdownMenuRadioItem>
-                  </DropdownMenuRadioGroup>
-                </DropdownMenuContent>
-              </DropdownMenu>
+                </PopoverTrigger>
+                <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0" align="start" sideOffset={4}>
+                  <Command>
+                    <CommandInput placeholder="Search states..." className="h-9" />
+                    <CommandEmpty>No states found.</CommandEmpty>
+                    <CommandGroup>
+                      {states.map((state) => (
+                        <CommandItem
+                          key={state.value}
+                          onSelect={() => {
+                            setFilterState(state.value || null);
+                            setOpenFilter(false);
+                          }}
+                          className="cursor-pointer"
+                        >
+                          <Check
+                            className={cn(
+                              "mr-2 h-4 w-4",
+                              filterState === state.value ? "opacity-100" : "opacity-0"
+                            )}
+                          />
+                          {state.label}
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  </Command>
+                </PopoverContent>
+              </Popover>
             </div>
           </div>
         </div>
@@ -244,11 +275,20 @@ interface MachineRowProps {
 }
 
 function MachineRow({ machine, appName }: MachineRowProps) {
-  const stateColors: Record<string, string> = {
-    started: 'bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100',
-    stopped: 'bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-100',
-    created: 'bg-blue-100 text-blue-800 dark:bg-blue-800 dark:text-blue-100',
-    suspended: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-800 dark:text-yellow-100',
+  // Get custom class for machine state badge
+  const getStateClass = (state: string): string => {
+    const stateClasses: Record<string, string> = {
+      started: 'bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100 border-green-200 dark:border-green-700',
+      stopped: 'bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-100 border-red-200 dark:border-red-700',
+      created: 'bg-blue-100 text-blue-800 dark:bg-blue-800 dark:text-blue-100 border-blue-200 dark:border-blue-700',
+      suspended: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-800 dark:text-yellow-100 border-yellow-200 dark:border-yellow-700',
+    };
+    return stateClasses[state] || 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-600';
+  };
+
+  // Capitalize first letter of state
+  const capitalizeState = (state: string): string => {
+    return state.charAt(0).toUpperCase() + state.slice(1);
   };
 
   return (
@@ -263,12 +303,17 @@ function MachineRow({ machine, appName }: MachineRowProps) {
         </Link>
       </td>
       <td className="px-6 py-4 whitespace-nowrap">
-        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${stateColors[machine.state] || 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'}`}>
-          {machine.state}
-        </span>
+        <Badge className={`rounded-full ${getStateClass(machine.state)}`}>
+          {capitalizeState(machine.state)}
+        </Badge>
       </td>
       <td className="px-6 py-4 whitespace-nowrap">
-        <div className="text-sm text-gray-500 dark:text-gray-400">{machine.region}</div>
+        <div className="flex items-center">
+          <span className="text-xl mr-2" title={machine.region || 'Unknown region'}>
+            {getRegionFlag(machine.region)}
+          </span>
+          <div className="text-sm text-gray-500 dark:text-gray-400">{machine.region}</div>
+        </div>
       </td>
       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
         <TimeAgo date={machine.created_at} />
