@@ -256,6 +256,19 @@ export default function AppDetailsPage() {
           >
             View Machines
           </Link>
+          <a
+            href={`https://fly-metrics.net/d/fly-app/fly-app?var-app=${app.name}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="w-full md:w-auto px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center justify-center transition-colors"
+          >
+            <img 
+              src="/grafana.svg" 
+              alt="Grafana" 
+              className="w-4 h-4 mr-2" 
+            />
+            Grafana Metrics
+          </a>
           <button
             onClick={openDeleteWarning}
             className="flex items-center justify-center px-4 py-2 border border-red-300 dark:border-red-600 bg-white dark:bg-gray-800 text-red-600 dark:text-red-400 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 cursor-pointer transition-colors"
