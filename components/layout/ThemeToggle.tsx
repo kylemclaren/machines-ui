@@ -38,7 +38,7 @@ export default function ThemeToggle() {
         </span>
       </div>
       
-      <div className="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none bg-gray-200 dark:bg-gray-700">
+      <div className="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none bg-gray-200 dark:bg-gray-700 cursor-pointer">
         <span className="sr-only">Toggle theme</span>
         <span
           className={`inline-block h-5 w-5 transform rounded-full bg-white shadow-md ring-0 transition-transform ${
