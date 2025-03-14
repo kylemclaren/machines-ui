@@ -83,6 +83,20 @@ export interface MachineMetadata {
   [key: string]: string | number | boolean | null | Record<string, any>;
 }
 
+export interface MachineProcess {
+  command: string;
+  cpu: number;
+  directory: string;
+  listen_sockets?: {
+    address: string;
+    proto: string;
+  }[];
+  pid: number;
+  rss: number;
+  rtime: number;
+  stime: number;
+}
+
 export interface Volume {
   id: string;
   name: string;

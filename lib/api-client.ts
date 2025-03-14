@@ -12,6 +12,7 @@ import {
   MachineEvent,
   MachineMetadata,
   AppSecret,
+  MachineProcess,
 } from '../types/api';
 
 // Use our Next.js API proxy to avoid CORS issues
@@ -260,6 +261,16 @@ class FlyMachinesApiClient {
     } catch (error) {
       this.handleError(error as AxiosError);
       return false;
+    }
+  }
+
+  async getProcesses(appName: string, machineId: string): Promise<MachineProcess[]> {
+    try {
+      const response = await this.client.get<MachineProcess[]>(`/apps/${appName}/machines/${machineId}/ps`);
+      return response.data;
+    } catch (error) {
+      this.handleError(error as AxiosError);
+      return [];
     }
   }
 

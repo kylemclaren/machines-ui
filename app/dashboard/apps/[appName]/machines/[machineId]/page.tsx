@@ -6,7 +6,7 @@ import { useApi } from '../../../../../../lib/api-context';
 import flyApi from '../../../../../../lib/api-client';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
-import { Machine, MachineEvent, CreateMachineRequest } from '../../../../../../types/api';
+import { Machine, MachineEvent, CreateMachineRequest, MachineProcess } from '../../../../../../types/api';
 import { TimeAgo } from "@/components/ui/time-ago";
 import toast from 'react-hot-toast';
 import { ConfirmationDialog } from '@/components/ui/confirmation-dialog';
@@ -114,6 +114,9 @@ export default function MachineDetailsPage() {
   const [newMachineName, setNewMachineName] = useState('');
   const [signalDialogOpen, setSignalDialogOpen] = useState(false);
   const [selectedSignal, setSelectedSignal] = useState('SIGTERM');
+  const [processFilter, setProcessFilter] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const processesPerPage = 10; // Fixed number of processes per page
 
   // Get machine details
   const { data: machine, isLoading: isMachineLoading, error } = useQuery(
@@ -142,6 +145,41 @@ export default function MachineDetailsPage() {
       enabled: isAuthenticated && !!appName && !!machineId,
     }
   );
+
+  // Get machine processes
+  const { data: processes = [], isLoading: isLoadingProcesses } = useQuery(
+    ['machine-processes', appName, machineId],
+    () => flyApi.getProcesses(appName, machineId),
+    {
+      enabled: isAuthenticated && !!appName && !!machineId,
+    }
+  );
+
+  // Filter and paginate processes
+  const filteredProcesses = React.useMemo(() => {
+    if (!processes || processes.length === 0) return [];
+    
+    return processes.filter(process => 
+      process.command && 
+      (processFilter === '' || 
+        process.command.toLowerCase().includes(processFilter.toLowerCase()) ||
+        process.pid.toString().includes(processFilter) ||
+        (process.directory && process.directory.toLowerCase().includes(processFilter.toLowerCase()))
+      )
+    );
+  }, [processes, processFilter]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredProcesses.length / processesPerPage));
+  
+  // Reset to page 1 when filter changes
+  React.useEffect(() => {
+    setCurrentPage(1);
+  }, [processFilter]);
+
+  const paginatedProcesses = React.useMemo(() => {
+    const startIndex = (currentPage - 1) * processesPerPage;
+    return filteredProcesses.slice(startIndex, startIndex + processesPerPage);
+  }, [filteredProcesses, currentPage, processesPerPage]);
 
   const openConfirmation = (action: 'start' | 'stop' | 'restart' | 'delete' | 'suspend') => {
     setConfirmAction(action);
@@ -413,6 +451,20 @@ export default function MachineDetailsPage() {
       suspended: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-800 dark:text-yellow-100 border-yellow-200 dark:border-yellow-700',
     };
     return stateClasses[state] || 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-600';
+  };
+
+  // Format process memory to human-readable format
+  const formatMemorySize = (bytes: number): string => {
+    const kb = bytes / 1024;
+    if (kb < 1024) {
+      return `${Math.round(kb * 10) / 10} KB`;
+    }
+    const mb = kb / 1024;
+    if (mb < 1024) {
+      return `${Math.round(mb * 10) / 10} MB`;
+    }
+    const gb = mb / 1024;
+    return `${Math.round(gb * 10) / 10} GB`;
   };
 
   return (
@@ -769,6 +821,158 @@ export default function MachineDetailsPage() {
               )}
             </div>
           </div>
+
+          {/* Running Processes Section */}
+          {machine?.state === 'started' && (
+            <div className="mx-6 mb-6 p-6 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700">
+              <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
+                Running Processes
+                <span className="ml-2 text-sm font-normal text-gray-500 dark:text-gray-400">
+                  ({filteredProcesses.length})
+                </span>
+              </h2>
+              {isLoadingProcesses ? (
+                <div className="flex justify-center p-4">
+                  <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                </div>
+              ) : processes.length > 0 ? (
+                <div>
+                  {/* Process filtering and searching */}
+                  <div className="mb-4 flex flex-col md:flex-row md:items-center justify-between gap-2">
+                    <div className="relative max-w-xs">
+                      <input
+                        type="text"
+                        placeholder="Filter processes..."
+                        className="w-full px-3 py-2 pr-10 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:text-white"
+                        value={processFilter}
+                        onChange={(e) => setProcessFilter(e.target.value)}
+                      />
+                      <div className="absolute inset-y-0 right-0 flex items-center pr-3">
+                        <svg className="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                          <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd" />
+                        </svg>
+                      </div>
+                    </div>
+                    <div className="text-sm text-gray-500 dark:text-gray-400">
+                      Showing {filteredProcesses.length > 0 ? Math.min((currentPage - 1) * processesPerPage + 1, filteredProcesses.length) : 0} - {Math.min(currentPage * processesPerPage, filteredProcesses.length)} of {filteredProcesses.length} processes
+                    </div>
+                  </div>
+                  
+                  {/* Process table */}
+                  <div className="overflow-x-auto">
+                    <table className="min-w-full border border-gray-200 dark:border-gray-700 rounded-md">
+                      <thead className="bg-gray-50 dark:bg-gray-800">
+                        <tr>
+                          <th scope="col" className="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                            PID
+                          </th>
+                          <th scope="col" className="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                            Command
+                          </th>
+                          <th scope="col" className="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                            CPU %
+                          </th>
+                          <th scope="col" className="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                            Memory
+                          </th>
+                          <th scope="col" className="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                            Directory
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
+                        {paginatedProcesses.map((process: MachineProcess) => (
+                          process.command && (
+                            <tr key={process.pid} className="hover:bg-gray-50 dark:hover:bg-gray-800">
+                              <td className="px-4 py-2 text-sm text-gray-900 dark:text-gray-100 font-mono">
+                                {process.pid}
+                              </td>
+                              <td className="px-4 py-2 text-sm text-gray-900 dark:text-gray-100 font-mono truncate max-w-xs">
+                                {process.command}
+                              </td>
+                              <td className="px-4 py-2 text-sm text-gray-900 dark:text-gray-100">
+                                {process.cpu.toFixed(1)}%
+                              </td>
+                              <td className="px-4 py-2 text-sm text-gray-900 dark:text-gray-100">
+                                {formatMemorySize(process.rss)}
+                              </td>
+                              <td className="px-4 py-2 text-sm text-gray-900 dark:text-gray-100 font-mono truncate max-w-xs">
+                                {process.directory}
+                              </td>
+                            </tr>
+                          )
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                  
+                  {/* Pagination */}
+                  {totalPages > 1 && (
+                    <div className="flex items-center justify-between mt-4">
+                      <button
+                        onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                        disabled={currentPage === 1}
+                        className="px-3 py-1 border border-gray-300 dark:border-gray-600 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 disabled:opacity-50"
+                      >
+                        Previous
+                      </button>
+                      <div className="flex items-center space-x-2">
+                        {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                          // Show pages around current page
+                          let pageToShow = currentPage;
+                          if (currentPage < 3) {
+                            pageToShow = i + 1;
+                          } else if (currentPage > totalPages - 2) {
+                            pageToShow = totalPages - 4 + i;
+                          } else {
+                            pageToShow = currentPage - 2 + i;
+                          }
+                          
+                          // Ensure the page is valid
+                          if (pageToShow <= 0 || pageToShow > totalPages) return null;
+                          
+                          return (
+                            <button
+                              key={pageToShow}
+                              onClick={() => setCurrentPage(pageToShow)}
+                              className={`px-3 py-1 border ${currentPage === pageToShow 
+                                ? 'border-blue-500 bg-blue-50 dark:bg-blue-900 text-blue-600 dark:text-blue-300' 
+                                : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300'} 
+                                rounded-md text-sm font-medium`}
+                            >
+                              {pageToShow}
+                            </button>
+                          );
+                        })}
+                        {totalPages > 5 && currentPage < totalPages - 2 && (
+                          <>
+                            <span className="text-gray-500 dark:text-gray-400">...</span>
+                            <button
+                              onClick={() => setCurrentPage(totalPages)}
+                              className={`px-3 py-1 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-md text-sm font-medium`}
+                            >
+                              {totalPages}
+                            </button>
+                          </>
+                        )}
+                      </div>
+                      <button
+                        onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                        disabled={currentPage === totalPages}
+                        className="px-3 py-1 border border-gray-300 dark:border-gray-600 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 disabled:opacity-50"
+                      >
+                        Next
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="bg-gray-50 dark:bg-gray-900 p-3 rounded-md">
+                  <p className="text-sm text-gray-500 dark:text-gray-400">No processes information available for this machine</p>
+                </div>
+              )}
+            </div>
+          )}
 
           <div className="border-t border-gray-200 dark:border-gray-700 p-6">
             <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
