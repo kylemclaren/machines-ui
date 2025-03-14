@@ -10,16 +10,19 @@ import { TimeAgo } from "@/components/ui/time-ago";
 import { ConfirmationDialog } from '@/components/ui/confirmation-dialog';
 import toast from 'react-hot-toast';
 import { CopyableCode } from '@/components/ui/copyable-code';
-import { Trash2, ExternalLink } from 'lucide-react';
+import { Trash2, ExternalLink, ShieldCheck, Plus, HelpCircle } from 'lucide-react';
 import axios from 'axios';
 import {
   Tooltip,
   TooltipContent,
+  TooltipContentNoArrow,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Badge } from '@/components/ui/badge';
+import { Button } from "@/components/ui/button";
 import { WarningDialog } from '@/components/ui/warning-dialog';
+import { GenerateSecretModal } from '@/components/ui/generate-secret-modal';
 
 export default function AppDetailsPage() {
   const { isAuthenticated } = useApi();
@@ -32,6 +35,16 @@ export default function AppDetailsPage() {
   const [isAppAccessible, setIsAppAccessible] = useState(false);
   const [isCheckingAccess, setIsCheckingAccess] = useState(false);
   const appUrl = `https://${appName}.fly.dev`;
+  
+  // State for secret deletion
+  const [secretToDelete, setSecretToDelete] = useState<string | null>(null);
+  const [isSecretDeleteWarningOpen, setIsSecretDeleteWarningOpen] = useState(false);
+  const [isSecretDeleteConfirmOpen, setIsSecretDeleteConfirmOpen] = useState(false);
+  const [isDeletingSecret, setIsDeletingSecret] = useState(false);
+  
+  // State for secret generation
+  const [isGenerateSecretModalOpen, setIsGenerateSecretModalOpen] = useState(false);
+  const [isGeneratingSecret, setIsGeneratingSecret] = useState(false);
 
   const { data: app, isLoading, error } = useQuery(
     ['app', appName],
@@ -77,6 +90,20 @@ export default function AppDetailsPage() {
     () => flyApi.listVolumes(appName),
     {
       enabled: isAuthenticated && !!appName,
+    }
+  );
+
+  // Query for app secrets
+  const { 
+    data: secrets = [], 
+    isLoading: isLoadingSecrets, 
+    refetch: refetchSecrets 
+  } = useQuery(
+    ['app-secrets', appName],
+    () => flyApi.listSecrets(appName),
+    {
+      enabled: isAuthenticated && !!appName,
+      refetchOnWindowFocus: false,
     }
   );
 
@@ -140,6 +167,85 @@ export default function AppDetailsPage() {
       setIsDeleting(false);
       setConfirmDeleteOpen(false);
     }
+  };
+
+  const openSecretDeleteWarning = (secretLabel: string) => {
+    setSecretToDelete(secretLabel);
+    setIsSecretDeleteWarningOpen(true);
+  };
+
+  const closeSecretDeleteWarning = () => {
+    setIsSecretDeleteWarningOpen(false);
+  };
+
+  const openSecretDeleteConfirm = () => {
+    setIsSecretDeleteWarningOpen(false);
+    setIsSecretDeleteConfirmOpen(true);
+  };
+
+  const closeSecretDeleteConfirm = () => {
+    setIsSecretDeleteConfirmOpen(false);
+    setSecretToDelete(null);
+  };
+
+  const handleDeleteSecret = async () => {
+    if (!secretToDelete) return;
+    
+    setIsDeletingSecret(true);
+    const toastId = toast.loading(`Deleting secret ${secretToDelete}...`);
+
+    try {
+      const success = await flyApi.deleteSecret(appName, secretToDelete);
+      if (success) {
+        toast.success(`Secret ${secretToDelete} deleted successfully`, { id: toastId });
+        refetchSecrets(); // Refresh the secrets list
+      } else {
+        toast.error(`Failed to delete secret ${secretToDelete}`, { id: toastId });
+      }
+    } catch (error) {
+      console.error('Error deleting secret:', error);
+      toast.error(`Error deleting secret. Please try again later.`, { id: toastId });
+    } finally {
+      setIsDeletingSecret(false);
+      setIsSecretDeleteConfirmOpen(false);
+      setSecretToDelete(null);
+    }
+  };
+
+  const handleGenerateSecret = async (label: string, type: string) => {
+    setIsGeneratingSecret(true);
+    const toastId = toast.loading(`Generating secret ${label}...`);
+
+    try {
+      const success = await flyApi.generateSecret(appName, label, type);
+      if (success) {
+        toast.success(`Secret ${label} generated successfully`, { id: toastId });
+        refetchSecrets(); // Refresh the secrets list
+      } else {
+        toast.error(`Failed to generate secret ${label}`, { id: toastId });
+      }
+    } catch (error) {
+      console.error('Error generating secret:', error);
+      toast.error(`Error generating secret. Please try again later.`, { id: toastId });
+    } finally {
+      setIsGeneratingSecret(false);
+    }
+  };
+
+  // Add descriptions for each secret type
+  const getSecretTypeDescription = (type: string): string => {
+    const descriptions: Record<string, string> = {
+      'SECRET_TYPE_KMS_HS256': 'HMAC SHA-256 - Used for creating and verifying message authentication codes using a 256-bit key.',
+      'SECRET_TYPE_KMS_HS384': 'HMAC SHA-384 - Used for creating and verifying message authentication codes using a 384-bit key.',
+      'SECRET_TYPE_KMS_HS512': 'HMAC SHA-512 - Used for creating and verifying message authentication codes using a 512-bit key.',
+      'SECRET_TYPE_KMS_XAES256GCM': 'AES-256 GCM - Advanced Encryption Standard with Galois/Counter Mode, provides both confidentiality and authentication.',
+      'SECRET_TYPE_KMS_NACL_AUTH': 'NaCl Auth - Used for authenticating messages without encryption.',
+      'SECRET_TYPE_KMS_NACL_BOX': 'NaCl Box - Public-key cryptography for authenticated encryption.',
+      'SECRET_TYPE_KMS_NACL_SECRETBOX': 'NaCl SecretBox - Secret-key authenticated encryption.',
+      'SECRET_TYPE_KMS_NACL_SIGN': 'NaCl Sign - Digital signatures using public-key cryptography.'
+    };
+    
+    return descriptions[type] || 'Cryptographic secret type for secure operations.';
   };
 
   if (isLoading) {
@@ -233,14 +339,14 @@ export default function AppDetailsPage() {
                       <ExternalLink size={20} className="hover:scale-110 transition-transform duration-200" />
                     </a>
                   </TooltipTrigger>
-                  <TooltipContent 
+                  <TooltipContentNoArrow
                     side="top" 
                     align="center" 
                     sideOffset={5} 
                     className="bg-gray-900 text-white dark:bg-white dark:text-gray-900 px-3 py-1.5 text-xs font-medium rounded-md shadow-lg border border-gray-800 dark:border-gray-200"
                   >
                     Visit {app.name}.fly.dev
-                  </TooltipContent>
+                  </TooltipContentNoArrow>
                 </Tooltip>
               </TooltipProvider>
             )}
@@ -353,6 +459,119 @@ export default function AppDetailsPage() {
         </div>
       </div>
 
+      {/* KMS Secrets Section - updated with generate button */}
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 mt-6">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-medium text-gray-900 dark:text-white flex items-center">
+            KMS Secrets
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button className="ml-1.5 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300">
+                    <HelpCircle size={16} />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContentNoArrow
+                  className="bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-gray-100 p-3 rounded-md shadow-md border border-gray-200 dark:border-gray-700 max-w-md"
+                >
+                  Fly.io's new KMS, "Pet Sematary," replaces HashiCorp Vault, providing scalable, hardware-isolated secrets management via a simple Linux filesystem interface (<span className="font-mono text-xs bg-gray-100 dark:bg-gray-700 px-1 py-0.5 rounded">/.fly/kms</span>). It offers automatic key rotation, transparent versioning, and simplified crypto operations, enhancing security without complexity.
+                </TooltipContentNoArrow>
+              </Tooltip>
+            </TooltipProvider>
+          </h2>
+          <Button
+            onClick={() => setIsGenerateSecretModalOpen(true)}
+            disabled={isGeneratingSecret}
+            className="bg-blue-600 hover:bg-blue-700 text-white cursor-pointer"
+            size="sm"
+          >
+            <Plus className="h-4 w-4 mr-1" />
+            Generate Secret
+          </Button>
+        </div>
+        
+        {isLoadingSecrets ? (
+          <div className="animate-pulse space-y-4">
+            <div className="h-12 bg-gray-200 dark:bg-gray-700 rounded"></div>
+            <div className="h-12 bg-gray-200 dark:bg-gray-700 rounded"></div>
+          </div>
+        ) : secrets.length === 0 ? (
+          <div className="text-center py-8 border border-dashed border-gray-300 dark:border-gray-600 rounded-md">
+            <ShieldCheck className="h-10 w-10 mx-auto text-gray-400 dark:text-gray-500 mb-2" />
+            <p className="text-gray-500 dark:text-gray-400">No secrets found for this app</p>
+            <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">
+              Manage your hardware-isolated KMS secrets via the <span className="font-mono text-xs bg-gray-100 dark:bg-gray-700 px-1 py-0.5 rounded">/.fly/kms</span> directory. Learn more <a href="https://community.fly.io/t/fly-kms/21825" target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline">here</a>.
+            </p>
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+              <thead className="bg-gray-50 dark:bg-gray-700">
+                <tr>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                    Label
+                  </th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                    Type
+                  </th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                    Public Key
+                  </th>
+                  <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
+                {secrets.map((secret) => (
+                  <tr key={secret.label} className="hover:bg-gray-50 dark:hover:bg-gray-800">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
+                      <div className="font-mono">{secret.label}</div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <span className="cursor-help border-b border-dotted border-gray-400 dark:border-gray-500">
+                              {secret.type}
+                            </span>
+                          </TooltipTrigger>
+                          <TooltipContentNoArrow 
+                            className="bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-gray-100 p-3 rounded-md shadow-md border border-gray-200 dark:border-gray-700 max-w-[300px]"
+                          >
+                            {getSecretTypeDescription(secret.type)}
+                          </TooltipContentNoArrow>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                      {secret.publickey ? (
+                        <div className="max-w-xs overflow-hidden">
+                          <CopyableCode value={Buffer.from(secret.publickey).toString('base64')} className="text-xs">
+                            {Buffer.from(secret.publickey).toString('base64').substring(0, 25)}...
+                          </CopyableCode>
+                        </div>
+                      ) : (
+                        <span className="text-gray-400 dark:text-gray-500">—</span>
+                      )}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                      <button 
+                        onClick={() => openSecretDeleteWarning(secret.label)}
+                        className="text-red-600 hover:text-red-800 dark:text-red-500 dark:hover:text-red-400 transition-colors cursor-pointer"
+                        aria-label={`Delete secret ${secret.label}`}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+
       {/* Warning Dialog */}
       <WarningDialog
         isOpen={warningDeleteOpen}
@@ -381,6 +600,44 @@ export default function AppDetailsPage() {
         requireValidation={true}
         validationText={appName}
         validationLabel={`To confirm deletion, please type "${appName}"`}
+      />
+
+      {/* Secret Delete Warning Dialog */}
+      <WarningDialog
+        isOpen={isSecretDeleteWarningOpen}
+        onClose={closeSecretDeleteWarning}
+        onConfirm={openSecretDeleteConfirm}
+        title="Delete Secret"
+        description={`Please review the consequences of deleting the secret "${secretToDelete}".`}
+        warningPoints={[
+          `This will permanently delete the secret "${secretToDelete}" from app ${appName}.`,
+          "Any machines or services using this secret will no longer be able to access it.",
+          "You may need to redeploy your app after deleting a secret.",
+          "This action cannot be undone."
+        ]}
+        confirmText="I understand"
+      />
+
+      {/* Secret Delete Confirmation Dialog */}
+      <ConfirmationDialog
+        isOpen={isSecretDeleteConfirmOpen}
+        onClose={closeSecretDeleteConfirm}
+        onConfirm={handleDeleteSecret}
+        title={`Delete secret "${secretToDelete}"?`}
+        description="This action cannot be undone. This will permanently delete this secret from your app."
+        confirmText="Delete"
+        destructive={true}
+        requireValidation={true}
+        validationText={secretToDelete || ''}
+        validationLabel={`To confirm deletion, please type "${secretToDelete}"`}
+      />
+
+      {/* Generate Secret Modal - updated */}
+      <GenerateSecretModal
+        isOpen={isGenerateSecretModalOpen}
+        onClose={() => setIsGenerateSecretModalOpen(false)}
+        onGenerate={handleGenerateSecret}
+        appName={appName}
       />
     </div>
   );
