@@ -444,19 +444,21 @@ export default function MachineDetailsPage() {
                           Stop Machine
                         </button>
                       )}
-                      <button
-                        onClick={() => {
-                          openConfirmation('restart');
-                          document.querySelector('[data-state="open"]')?.dispatchEvent(
-                            new KeyboardEvent('keydown', { key: 'Escape' })
-                          );
-                        }}
-                        disabled={isLoading}
-                        className="w-full flex items-center justify-center gap-2 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 transition-colors"
-                      >
-                        <RotateCw size={16} />
-                        Restart Machine
-                      </button>
+                      {machine?.state === 'started' && (
+                        <button
+                          onClick={() => {
+                            openConfirmation('restart');
+                            document.querySelector('[data-state="open"]')?.dispatchEvent(
+                              new KeyboardEvent('keydown', { key: 'Escape' })
+                            );
+                          }}
+                          disabled={isLoading}
+                          className="w-full flex items-center justify-center gap-2 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 transition-colors"
+                        >
+                          <RotateCw size={16} />
+                          Restart Machine
+                        </button>
+                      )}
                       {machine?.state === 'started' && (
                         <button
                           onClick={() => {

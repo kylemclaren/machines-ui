@@ -70,15 +70,17 @@ export function MachineActionButtons({
             Stop
           </button>
         )}
-        <button
-          onClick={() => onAction('restart')}
-          disabled={isLoading}
-          className="action-btn h-10 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 flex items-center cursor-pointer"
-          style={{ '--btn-index': '2' } as React.CSSProperties}
-        >
-          <RotateCw size={18} className="mr-2" />
-          Restart
-        </button>
+        {machineState === 'started' && (
+          <button
+            onClick={() => onAction('restart')}
+            disabled={isLoading}
+            className="action-btn h-10 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 flex items-center cursor-pointer"
+            style={{ '--btn-index': '2' } as React.CSSProperties}
+          >
+            <RotateCw size={18} className="mr-2" />
+            Restart
+          </button>
+        )}
         {machineState === 'started' && (
           <button
             onClick={() => onAction('suspend')}
