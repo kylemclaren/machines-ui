@@ -10,7 +10,7 @@ import { TimeAgo } from "@/components/ui/time-ago";
 import { ConfirmationDialog } from '@/components/ui/confirmation-dialog';
 import toast from 'react-hot-toast';
 import { CopyableCode } from '@/components/ui/copyable-code';
-import { Trash2, ExternalLink, ShieldAlert, Plus, HelpCircle } from 'lucide-react';
+import { Trash2, ExternalLink, ShieldCheck, Plus, HelpCircle } from 'lucide-react';
 import axios from 'axios';
 import {
   Tooltip,
@@ -497,10 +497,10 @@ export default function AppDetailsPage() {
           </div>
         ) : secrets.length === 0 ? (
           <div className="text-center py-8 border border-dashed border-gray-300 dark:border-gray-600 rounded-md">
-            <ShieldAlert className="h-10 w-10 mx-auto text-gray-400 dark:text-gray-500 mb-2" />
+            <ShieldCheck className="h-10 w-10 mx-auto text-gray-400 dark:text-gray-500 mb-2" />
             <p className="text-gray-500 dark:text-gray-400">No secrets found for this app</p>
             <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">
-              Secrets are used to store sensitive configuration values
+              Manage your hardware-isolated KMS secrets via the <span className="font-mono text-xs bg-gray-100 dark:bg-gray-700 px-1 py-0.5 rounded">/.fly/kms</span> directory. Learn more <a href="https://community.fly.io/t/fly-kms/21825" target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline">here</a>.
             </p>
           </div>
         ) : (
