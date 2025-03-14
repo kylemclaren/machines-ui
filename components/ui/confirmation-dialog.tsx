@@ -23,6 +23,7 @@ interface ConfirmationDialogProps {
   requireValidation?: boolean;
   validationText?: string;
   validationLabel?: string;
+  customContent?: React.ReactNode;
 }
 
 export function ConfirmationDialog({
@@ -37,6 +38,7 @@ export function ConfirmationDialog({
   requireValidation = false,
   validationText = "",
   validationLabel = "Type the name to confirm",
+  customContent,
 }: ConfirmationDialogProps) {
   const [inputValue, setInputValue] = useState("");
   const isValid = !requireValidation || inputValue === validationText;
@@ -53,6 +55,8 @@ export function ConfirmationDialog({
           <AlertDialogTitle>{title}</AlertDialogTitle>
           <AlertDialogDescription className="pb-0">{description}</AlertDialogDescription>
         </AlertDialogHeader>
+
+        {customContent}
 
         {requireValidation && validationText && (
           <div className="pt-3 mb-4 border-t border-gray-200 dark:border-gray-700 mt-3">

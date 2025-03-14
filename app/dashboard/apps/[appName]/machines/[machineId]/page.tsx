@@ -6,7 +6,7 @@ import { useApi } from '../../../../../../lib/api-context';
 import flyApi from '../../../../../../lib/api-client';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
-import { Machine, MachineEvent } from '../../../../../../types/api';
+import { Machine, MachineEvent, CreateMachineRequest } from '../../../../../../types/api';
 import { TimeAgo } from "@/components/ui/time-ago";
 import toast from 'react-hot-toast';
 import { ConfirmationDialog } from '@/components/ui/confirmation-dialog';
@@ -24,7 +24,8 @@ import {
   Settings,
   ArrowLeft,
   Loader2,
-  Cog
+  Cog,
+  Copy
 } from 'lucide-react';
 import { CopyableCode } from '@/components/ui/copyable-code';
 import { CopyableJson } from '@/components/ui/copyable-json';
@@ -67,6 +68,8 @@ export default function MachineDetailsPage() {
   const [confirmationOpen, setConfirmationOpen] = useState(false);
   const [confirmAction, setConfirmAction] = useState<'start' | 'stop' | 'restart' | 'delete' | 'suspend' | null>(null);
   const [terminalOpen, setTerminalOpen] = useState(false);
+  const [cloneConfirmOpen, setCloneConfirmOpen] = useState(false);
+  const [newMachineName, setNewMachineName] = useState('');
 
   // Get machine details
   const { data: machine, isLoading: isMachineLoading, error } = useQuery(
@@ -111,6 +114,19 @@ export default function MachineDetailsPage() {
 
   const closeTerminal = () => {
     setTerminalOpen(false);
+  };
+
+  const openCloneConfirmation = () => {
+    if (machine) {
+      // Generate a default name for the cloned machine
+      const timestamp = new Date().toISOString().replace(/[-:T.Z]/g, '').substring(0, 12);
+      setNewMachineName(`${machine.name}-clone-${timestamp}`);
+      setCloneConfirmOpen(true);
+    }
+  };
+
+  const closeCloneConfirmation = () => {
+    setCloneConfirmOpen(false);
   };
 
   const getConfirmationMessage = () => {
@@ -177,6 +193,42 @@ export default function MachineDetailsPage() {
       toast.error(`Error ${action}ing machine. Please try again later.`, { id: toastId });
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleCloneMachine = async () => {
+    if (!machine) return;
+    
+    const toastId = toast.loading(`Cloning machine...`);
+    setIsLoading(true);
+    
+    try {
+      // Prepare the request data
+      const createMachineRequest: CreateMachineRequest = {
+        name: newMachineName,
+        config: machine.config,
+        region: machine.region
+      };
+      
+      console.log('Cloning machine with config:', createMachineRequest);
+      
+      // Create the new machine
+      const newMachine = await flyApi.createMachine(appName, createMachineRequest);
+      
+      if (newMachine) {
+        toast.success(`Machine cloned successfully`, { id: toastId });
+        
+        // Navigate to the new machine
+        router.push(`/dashboard/apps/${appName}/machines/${newMachine.id}`);
+      } else {
+        toast.error(`Failed to clone machine`, { id: toastId });
+      }
+    } catch (error) {
+      console.error('Error cloning machine:', error);
+      toast.error(`Error cloning machine. Please try again later.`, { id: toastId });
+    } finally {
+      setIsLoading(false);
+      closeCloneConfirmation();
     }
   };
 
@@ -342,6 +394,7 @@ export default function MachineDetailsPage() {
                   isLoading={isLoading}
                   onAction={openConfirmation}
                   onOpenTerminal={openTerminal}
+                  onClone={openCloneConfirmation}
                 />
               </div>
               
@@ -419,6 +472,19 @@ export default function MachineDetailsPage() {
                           Suspend Machine
                         </button>
                       )}
+                      <button
+                        onClick={() => {
+                          openCloneConfirmation();
+                          document.querySelector('[data-state="open"]')?.dispatchEvent(
+                            new KeyboardEvent('keydown', { key: 'Escape' })
+                          );
+                        }}
+                        disabled={isLoading}
+                        className="w-full flex items-center justify-center gap-2 py-3 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-50 transition-colors"
+                      >
+                        <Copy size={16} />
+                        Clone Machine
+                      </button>
                       {machine?.state === 'started' && (
                         <button
                           onClick={() => {
@@ -662,6 +728,35 @@ export default function MachineDetailsPage() {
         requireValidation={confirmAction === 'delete'}
         validationText={confirmAction === 'delete' ? machine?.name || machineId : ''}
         validationLabel={confirmAction === 'delete' ? `To confirm deletion, please type "${machine?.name || machineId}"` : ''}
+      />
+
+      {/* Clone Confirmation Dialog */}
+      <ConfirmationDialog
+        isOpen={cloneConfirmOpen}
+        onClose={closeCloneConfirmation}
+        onConfirm={handleCloneMachine}
+        title="Clone Machine"
+        description="This will create a new Machine with the same configuration as the current one."
+        confirmText="Clone"
+        destructive={false}
+        customContent={
+          <div className="mt-4">
+            <label htmlFor="machineName" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              New Machine Name
+            </label>
+            <input
+              type="text"
+              id="machineName"
+              value={newMachineName}
+              onChange={(e) => setNewMachineName(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:text-white"
+              placeholder="Enter a name for the cloned Machine"
+            />
+            <p className="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
+              Leave blank to generate a name automatically
+            </p>
+          </div>
+        }
       />
 
       {/* Terminal Dialog */}
