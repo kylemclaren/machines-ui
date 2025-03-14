@@ -25,7 +25,8 @@ import {
   ArrowLeft,
   Loader2,
   Cog,
-  Copy
+  Copy,
+  Zap
 } from 'lucide-react';
 import { CopyableCode } from '@/components/ui/copyable-code';
 import { CopyableJson } from '@/components/ui/copyable-json';
@@ -53,9 +54,50 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { TerminalDialog } from '@/components/ui/terminal-dialog';
 import { Badge } from '@/components/ui/badge';
 import { MachineActionButtons } from '@/components/dashboard/MachineActionButtons';
+
+// Define available signals
+const AVAILABLE_SIGNALS = [
+  'SIGABRT',
+  'SIGALRM',
+  'SIGFPE',
+  'SIGHUP',
+  'SIGILL',
+  'SIGINT',
+  'SIGKILL',
+  'SIGPIPE',
+  'SIGQUIT',
+  'SIGSEGV',
+  'SIGTERM',
+  'SIGTRAP',
+  'SIGUSR1'
+];
+
+// Signal descriptions
+const SIGNAL_DESCRIPTIONS: Record<string, string> = {
+  'SIGABRT': 'Abort signal, used for abnormal termination',
+  'SIGALRM': 'Alarm clock signal, used for timers',
+  'SIGFPE': 'Floating-point exception signal',
+  'SIGHUP': 'Hangup signal, used when terminal connection is lost',
+  'SIGILL': 'Illegal instruction signal',
+  'SIGINT': 'Interrupt signal, similar to Ctrl+C',
+  'SIGKILL': 'Kill signal, forces immediate termination (cannot be caught or ignored)',
+  'SIGPIPE': 'Broken pipe signal',
+  'SIGQUIT': 'Quit signal, similar to Ctrl+\\',
+  'SIGSEGV': 'Segmentation fault signal',
+  'SIGTERM': 'Termination signal, graceful shutdown',
+  'SIGTRAP': 'Trace/breakpoint trap signal',
+  'SIGUSR1': 'User-defined signal 1, for custom use'
+};
 
 export default function MachineDetailsPage() {
   const { isAuthenticated } = useApi();
@@ -70,6 +112,8 @@ export default function MachineDetailsPage() {
   const [terminalOpen, setTerminalOpen] = useState(false);
   const [cloneConfirmOpen, setCloneConfirmOpen] = useState(false);
   const [newMachineName, setNewMachineName] = useState('');
+  const [signalDialogOpen, setSignalDialogOpen] = useState(false);
+  const [selectedSignal, setSelectedSignal] = useState('SIGTERM');
 
   // Get machine details
   const { data: machine, isLoading: isMachineLoading, error } = useQuery(
@@ -127,6 +171,15 @@ export default function MachineDetailsPage() {
 
   const closeCloneConfirmation = () => {
     setCloneConfirmOpen(false);
+  };
+
+  const openSignalDialog = () => {
+    setSelectedSignal('SIGTERM'); // Default to SIGTERM
+    setSignalDialogOpen(true);
+  };
+
+  const closeSignalDialog = () => {
+    setSignalDialogOpen(false);
   };
 
   const getConfirmationMessage = () => {
@@ -229,6 +282,31 @@ export default function MachineDetailsPage() {
     } finally {
       setIsLoading(false);
       closeCloneConfirmation();
+    }
+  };
+
+  const handleSignalMachine = async () => {
+    if (!machine || !selectedSignal) return;
+    
+    const toastId = toast.loading(`Sending ${selectedSignal} signal to machine...`);
+    setIsLoading(true);
+    
+    try {
+      const success = await flyApi.signalMachine(appName, machineId, selectedSignal);
+      
+      if (success) {
+        toast.success(`${selectedSignal} signal sent successfully`, { id: toastId });
+        // Refetch machine to update UI
+        await queryClient.invalidateQueries(['machine', appName, machineId]);
+      } else {
+        toast.error(`Failed to send ${selectedSignal} signal`, { id: toastId });
+      }
+    } catch (error) {
+      console.error('Error signaling machine:', error);
+      toast.error(`Error sending signal to machine. Please try again later.`, { id: toastId });
+    } finally {
+      setIsLoading(false);
+      closeSignalDialog();
     }
   };
 
@@ -395,6 +473,7 @@ export default function MachineDetailsPage() {
                   onAction={openConfirmation}
                   onOpenTerminal={openTerminal}
                   onClone={openCloneConfirmation}
+                  onSignal={openSignalDialog}
                 />
               </div>
               
@@ -457,6 +536,21 @@ export default function MachineDetailsPage() {
                         >
                           <RotateCw size={16} />
                           Restart Machine
+                        </button>
+                      )}
+                      {machine?.state === 'started' && (
+                        <button
+                          onClick={() => {
+                            openSignalDialog();
+                            document.querySelector('[data-state="open"]')?.dispatchEvent(
+                              new KeyboardEvent('keydown', { key: 'Escape' })
+                            );
+                          }}
+                          disabled={isLoading}
+                          className="w-full flex items-center justify-center gap-2 py-3 bg-orange-600 text-white rounded-md hover:bg-orange-700 disabled:opacity-50 transition-colors"
+                        >
+                          <Zap size={16} />
+                          Signal Machine
                         </button>
                       )}
                       {machine?.state === 'started' && (
@@ -757,6 +851,51 @@ export default function MachineDetailsPage() {
             <p className="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
               Leave blank to generate a name automatically
             </p>
+          </div>
+        }
+      />
+
+      {/* Signal Dialog */}
+      <ConfirmationDialog
+        isOpen={signalDialogOpen}
+        onClose={closeSignalDialog}
+        onConfirm={handleSignalMachine}
+        title="Signal Machine"
+        description="Send a signal to the running Machine. This can be used to control the machine's behavior or terminate processes."
+        confirmText="Send Signal"
+        destructive={selectedSignal === 'SIGKILL' || selectedSignal === 'SIGTERM' || selectedSignal === 'SIGABRT'}
+        customContent={
+          <div className="mt-4">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              Select Signal Type
+            </label>
+            <Select
+              value={selectedSignal}
+              onValueChange={(value) => setSelectedSignal(value)}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select signal" />
+              </SelectTrigger>
+              <SelectContent>
+                {AVAILABLE_SIGNALS.map((signal) => (
+                  <SelectItem key={signal} value={signal}>
+                    {signal}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {selectedSignal && (
+              <div className="mt-3 mb-2 p-3 bg-gray-50 dark:bg-gray-800 rounded-md border border-gray-200 dark:border-gray-700">
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  {SIGNAL_DESCRIPTIONS[selectedSignal] || 'No description available.'}
+                </p>
+                {(selectedSignal === 'SIGKILL' || selectedSignal === 'SIGTERM') && (
+                  <p className="text-sm text-red-600 dark:text-red-400 mt-2">
+                    <strong>Warning:</strong> This signal may terminate processes or the entire Machine.
+                  </p>
+                )}
+              </div>
+            )}
           </div>
         }
       />

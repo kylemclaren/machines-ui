@@ -9,7 +9,8 @@ import {
   Terminal, 
   Cog,
   Pause,
-  Copy 
+  Copy,
+  Zap 
 } from 'lucide-react';
 
 interface MachineActionButtonsProps {
@@ -18,6 +19,7 @@ interface MachineActionButtonsProps {
   onAction: (action: 'start' | 'stop' | 'restart' | 'delete' | 'suspend') => void;
   onOpenTerminal: () => void;
   onClone: () => void;
+  onSignal: () => void;
 }
 
 export function MachineActionButtons({
@@ -25,7 +27,8 @@ export function MachineActionButtons({
   isLoading,
   onAction,
   onOpenTerminal,
-  onClone
+  onClone,
+  onSignal
 }: MachineActionButtonsProps) {
   const [actionsExpanded, setActionsExpanded] = useState(false);
   
@@ -83,10 +86,21 @@ export function MachineActionButtons({
         )}
         {machineState === 'started' && (
           <button
+            onClick={onSignal}
+            disabled={isLoading}
+            className="action-btn h-10 px-4 py-2 bg-orange-600 text-white rounded-md hover:bg-orange-700 disabled:opacity-50 flex items-center cursor-pointer"
+            style={{ '--btn-index': '3' } as React.CSSProperties}
+          >
+            <Zap size={18} className="mr-2" />
+            Signal
+          </button>
+        )}
+        {machineState === 'started' && (
+          <button
             onClick={() => onAction('suspend')}
             disabled={isLoading}
             className="action-btn h-10 px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 disabled:opacity-50 flex items-center cursor-pointer" 
-            style={{ '--btn-index': '3' } as React.CSSProperties}
+            style={{ '--btn-index': '4' } as React.CSSProperties}
           >
             <Pause size={18} className="mr-2" />
             Suspend
@@ -97,7 +111,7 @@ export function MachineActionButtons({
             onClick={onOpenTerminal}
             disabled={isLoading}
             className="action-btn h-10 px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 disabled:opacity-50 flex items-center cursor-pointer"
-            style={{ '--btn-index': '4' } as React.CSSProperties}
+            style={{ '--btn-index': '5' } as React.CSSProperties}
           >
             <Terminal size={18} className="mr-2" />
             Run
@@ -107,7 +121,7 @@ export function MachineActionButtons({
           onClick={onClone}
           disabled={isLoading}
           className="action-btn h-10 px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-50 flex items-center cursor-pointer"
-          style={{ '--btn-index': '5' } as React.CSSProperties}
+          style={{ '--btn-index': '6' } as React.CSSProperties}
         >
           <Copy size={18} className="mr-2" />
           Clone
