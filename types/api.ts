@@ -12,6 +12,12 @@ export interface ListAppsResponse {
   apps: App[];
 }
 
+export interface AppSecret {
+  label: string;
+  publickey: number[];
+  type: string;
+}
+
 export interface Machine {
   id: string;
   name: string;
@@ -111,4 +117,17 @@ export interface UpdateMachineRequest {
 export interface ErrorResponse {
   error: string;
   message: string;
-} 
+}
+
+export const SECRET_TYPES = {
+  SECRET_TYPE_KMS_HS256: 'SECRET_TYPE_KMS_HS256',
+  SECRET_TYPE_KMS_HS384: 'SECRET_TYPE_KMS_HS384',
+  SECRET_TYPE_KMS_HS512: 'SECRET_TYPE_KMS_HS512',
+  SECRET_TYPE_KMS_XAES256GCM: 'SECRET_TYPE_KMS_XAES256GCM',
+  SECRET_TYPE_KMS_NACL_AUTH: 'SECRET_TYPE_KMS_NACL_AUTH',
+  SECRET_TYPE_KMS_NACL_BOX: 'SECRET_TYPE_KMS_NACL_BOX',
+  SECRET_TYPE_KMS_NACL_SECRETBOX: 'SECRET_TYPE_KMS_NACL_SECRETBOX',
+  SECRET_TYPE_KMS_NACL_SIGN: 'SECRET_TYPE_KMS_NACL_SIGN',
+} as const;
+
+export type SecretType = keyof typeof SECRET_TYPES; 

@@ -11,6 +11,7 @@ import {
   UpdateMachineRequest,
   MachineEvent,
   MachineMetadata,
+  AppSecret,
 } from '../types/api';
 
 // Use our Next.js API proxy to avoid CORS issues
@@ -311,6 +312,37 @@ class FlyMachinesApiClient {
     } catch (error) {
       this.handleError(error as AxiosError);
       return null;
+    }
+  }
+
+  // Secrets
+  async listSecrets(appName: string): Promise<AppSecret[]> {
+    try {
+      const response = await this.client.get<AppSecret[]>(`/apps/${appName}/secrets`);
+      return response.data;
+    } catch (error) {
+      this.handleError(error as AxiosError);
+      return [];
+    }
+  }
+
+  async deleteSecret(appName: string, secretLabel: string): Promise<boolean> {
+    try {
+      await this.client.delete(`/apps/${appName}/secrets/${secretLabel}`);
+      return true;
+    } catch (error) {
+      this.handleError(error as AxiosError);
+      return false;
+    }
+  }
+
+  async generateSecret(appName: string, secretLabel: string, secretType: string): Promise<boolean> {
+    try {
+      await this.client.post(`/apps/${appName}/secrets/${secretLabel}/type/${secretType}/generate`);
+      return true;
+    } catch (error) {
+      this.handleError(error as AxiosError);
+      return false;
     }
   }
 
