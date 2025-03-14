@@ -8,7 +8,8 @@ import {
   Trash2, 
   Terminal, 
   Cog,
-  Pause 
+  Pause,
+  Copy 
 } from 'lucide-react';
 
 interface MachineActionButtonsProps {
@@ -16,13 +17,15 @@ interface MachineActionButtonsProps {
   isLoading: boolean;
   onAction: (action: 'start' | 'stop' | 'restart' | 'delete' | 'suspend') => void;
   onOpenTerminal: () => void;
+  onClone: () => void;
 }
 
 export function MachineActionButtons({
   machineState,
   isLoading,
   onAction,
-  onOpenTerminal
+  onOpenTerminal,
+  onClone
 }: MachineActionButtonsProps) {
   const [actionsExpanded, setActionsExpanded] = useState(false);
   
@@ -98,6 +101,15 @@ export function MachineActionButtons({
             Run
           </button>
         )}
+        <button
+          onClick={onClone}
+          disabled={isLoading}
+          className="action-btn h-10 px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-50 flex items-center cursor-pointer"
+          style={{ '--btn-index': '5' } as React.CSSProperties}
+        >
+          <Copy size={18} className="mr-2" />
+          Clone
+        </button>
         {machineState !== 'started' && (
           <button
             onClick={() => onAction('delete')}
