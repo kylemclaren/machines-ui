@@ -1,11 +1,11 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { fetchStatusFeed } from '@/lib/status-feed';
-import { CheckCircle2 } from 'lucide-react';
+import { fetchStatusFeed, StatusEntry } from '@/lib/status-feed';
+import { CheckCircle2, ExternalLink } from 'lucide-react';
 
 export default function StatusIndicator() {
-  const [hasIncidents, setHasIncidents] = useState(false);
+  const [activeIncident, setActiveIncident] = useState<StatusEntry | null>(null);
   const [loading, setLoading] = useState(true);
   const [initialized, setInitialized] = useState(false);
 
@@ -36,11 +36,11 @@ export default function StatusIndicator() {
           return isIncidentInTitle || hasActiveKeywords;
         });
         
-        setHasIncidents(activeIncidents.length > 0);
+        setActiveIncident(activeIncidents.length > 0 ? activeIncidents[0] : null);
       } catch (err) {
         console.error('Error checking status:', err);
         // In case of error, don't show the indicator
-        setHasIncidents(true);
+        setActiveIncident(null);
       } finally {
         setLoading(false);
       }
@@ -54,10 +54,28 @@ export default function StatusIndicator() {
   }, []);
 
   // During server-side rendering or before initialization, don't render anything
-  if (!initialized || loading || hasIncidents) {
+  if (!initialized || loading) {
     return null;
   }
 
+  if (activeIncident) {
+    // Incident state: yellow with incident title
+    return (
+      <div className="w-full flex justify-center py-2">
+        <a 
+          href={activeIncident.link} 
+          target="_blank" 
+          rel="noopener noreferrer"
+          className="flex items-center space-x-2 bg-yellow-50 dark:bg-yellow-900/30 hover:bg-yellow-100 dark:hover:bg-yellow-800/50 rounded-full shadow-sm px-3 py-1.5 border border-yellow-200 dark:border-yellow-800 cursor-pointer transition-colors"
+        >
+          <span className="text-xs font-medium text-yellow-700 dark:text-yellow-300 max-w-[180px] truncate">{activeIncident.title}</span>
+          <ExternalLink className="h-3 w-3 text-yellow-500 dark:text-yellow-400 flex-shrink-0" />
+        </a>
+      </div>
+    );
+  }
+
+  // Normal state: green with "All Systems Operational"
   return (
     <div className="w-full flex justify-center py-2">
       <div className="flex items-center space-x-2 bg-white dark:bg-gray-700 rounded-full shadow-sm px-3 py-1.5 border border-green-200 dark:border-green-800">
