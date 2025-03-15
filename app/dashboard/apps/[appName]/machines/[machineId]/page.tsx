@@ -64,6 +64,7 @@ import {
 import { TerminalDialog } from '@/components/ui/terminal-dialog';
 import { Badge } from '@/components/ui/badge';
 import { MachineActionButtons } from '@/components/dashboard/MachineActionButtons';
+import { FLY_REGIONS } from '@/lib/regions';
 
 // Define available signals
 const AVAILABLE_SIGNALS = [
@@ -112,6 +113,7 @@ export default function MachineDetailsPage() {
   const [terminalOpen, setTerminalOpen] = useState(false);
   const [cloneConfirmOpen, setCloneConfirmOpen] = useState(false);
   const [newMachineName, setNewMachineName] = useState('');
+  const [selectedRegion, setSelectedRegion] = useState('');
   const [signalDialogOpen, setSignalDialogOpen] = useState(false);
   const [selectedSignal, setSelectedSignal] = useState('SIGTERM');
   const [processFilter, setProcessFilter] = useState('');
@@ -203,6 +205,8 @@ export default function MachineDetailsPage() {
       // Generate a default name for the cloned machine
       const timestamp = new Date().toISOString().replace(/[-:T.Z]/g, '').substring(0, 12);
       setNewMachineName(`${machine.name}-clone-${timestamp}`);
+      // Set the default region to match the existing machine
+      setSelectedRegion(machine.region || '');
       setCloneConfirmOpen(true);
     }
   };
@@ -298,7 +302,7 @@ export default function MachineDetailsPage() {
       const createMachineRequest: CreateMachineRequest = {
         name: newMachineName,
         config: machine.config,
-        region: machine.region
+        region: selectedRegion // Use the selected region
       };
       
       console.log('Cloning machine with config:', createMachineRequest);
@@ -1040,21 +1044,50 @@ export default function MachineDetailsPage() {
         confirmText="Clone"
         destructive={false}
         customContent={
-          <div className="mt-4">
-            <label htmlFor="machineName" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              New Machine Name
-            </label>
-            <input
-              type="text"
-              id="machineName"
-              value={newMachineName}
-              onChange={(e) => setNewMachineName(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:text-white"
-              placeholder="Enter a name for the cloned Machine"
-            />
-            <p className="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
-              Leave blank to generate a name automatically
-            </p>
+          <div className="mt-4 space-y-4">
+            <div>
+              <label htmlFor="machineName" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                New Machine Name
+              </label>
+              <input
+                type="text"
+                id="machineName"
+                value={newMachineName}
+                onChange={(e) => setNewMachineName(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:text-white"
+                placeholder="Enter a name for the cloned Machine"
+              />
+              <p className="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
+                Leave blank to generate a name automatically
+              </p>
+            </div>
+
+            <div>
+              <label htmlFor="regionSelect" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Region
+              </label>
+              <Select
+                value={selectedRegion}
+                onValueChange={(value) => setSelectedRegion(value)}
+              >
+                <SelectTrigger className="w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600" id="regionSelect">
+                  <SelectValue placeholder="Select region" />
+                </SelectTrigger>
+                <SelectContent className="bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600 max-h-80">
+                  {FLY_REGIONS.map((region) => (
+                    <SelectItem key={region.code} value={region.code} className="text-gray-900 dark:text-gray-100 focus:bg-gray-100 dark:focus:bg-gray-600">
+                      <div className="flex items-center">
+                        <span className="mr-2">{getRegionFlag(region.code)}</span>
+                        <span>{region.name} ({region.code})</span>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
+                Choose the region where this Machine will be deployed
+              </p>
+            </div>
           </div>
         }
       />

@@ -31,6 +31,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
+import { FLY_REGIONS } from "@/lib/regions";
+import { getRegionFlag } from "@/lib/utils";
 
 // Create a schema for form validation
 const formSchema = z.object({
@@ -107,22 +109,6 @@ export function MachineCreateForm({
     
     fetchImage();
   }, [open, getImage, form]);
-
-  // List of popular regions
-  const regions = [
-    { value: "sjc", label: "San Jose, California (SJC)" },
-    { value: "sea", label: "Seattle, Washington (SEA)" },
-    { value: "ord", label: "Chicago, Illinois (ORD)" },
-    { value: "iad", label: "Ashburn, Virginia (IAD)" },
-    { value: "ewr", label: "Secaucus, NJ (EWR)" },
-    { value: "yyz", label: "Toronto, Canada (YYZ)" },
-    { value: "ams", label: "Amsterdam, Netherlands (AMS)" },
-    { value: "lhr", label: "London, United Kingdom (LHR)" },
-    { value: "fra", label: "Frankfurt, Germany (FRA)" },
-    { value: "syd", label: "Sydney, Australia (SYD)" },
-    { value: "nrt", label: "Tokyo, Japan (NRT)" },
-    { value: "sin", label: "Singapore (SIN)" },
-  ];
 
   // List of machine sizes
   const machineSizes = [
@@ -241,10 +227,13 @@ export function MachineCreateForm({
                             <SelectValue placeholder="Select a region" />
                           </SelectTrigger>
                         </FormControl>
-                        <SelectContent className="bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600">
-                          {regions.map((region) => (
-                            <SelectItem key={region.value} value={region.value} className="text-gray-900 dark:text-gray-100 focus:bg-gray-100 dark:focus:bg-gray-600">
-                              {region.label}
+                        <SelectContent className="bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600 max-h-80">
+                          {FLY_REGIONS.map((region) => (
+                            <SelectItem key={region.code} value={region.code} className="text-gray-900 dark:text-gray-100 focus:bg-gray-100 dark:focus:bg-gray-600">
+                              <div className="flex items-center">
+                                <span className="mr-2">{getRegionFlag(region.code)}</span>
+                                <span>{region.name} ({region.code})</span>
+                              </div>
                             </SelectItem>
                           ))}
                         </SelectContent>
